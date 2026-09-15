@@ -95,52 +95,60 @@ worksheet = get_google_sheet()
 
 # ============================================================
 # CUSTOM CSS
+# DARK-MODE FRIENDLY
 # ============================================================
 
 st.markdown(
     """
     <style>
 
-    /* Main title */
+    /* ======================================================
+       MAIN TITLE
+       ====================================================== */
 
     .main-title {
         text-align: center;
         font-size: 32px;
         font-weight: 700;
-        color: #111111;
         margin-bottom: 10px;
+        line-height: 1.3;
     }
 
 
-    /* Subtitle */
+    /* ======================================================
+       SUBTITLE
+       ====================================================== */
 
     .subtitle {
         text-align: center;
         font-size: 18px;
         font-weight: 500;
-        color: #222222;
         margin-bottom: 30px;
         line-height: 1.5;
     }
 
 
-    /* Section headings */
+    /* ======================================================
+       SECTION HEADINGS
+       ====================================================== */
 
     .section-title {
         font-size: 24px;
         font-weight: 650;
         margin-top: 20px;
         margin-bottom: 15px;
+        line-height: 1.4;
     }
 
 
-    /* English sentence */
+    /* ======================================================
+       ENGLISH SENTENCE
+       ====================================================== */
 
     .sentence-box {
-        background-color: #f7f7f7;
         padding: 20px;
         border-radius: 12px;
-        border: 1px solid #dddddd;
+        border: 1px solid rgba(128, 128, 128, 0.35);
         font-size: 20px;
         line-height: 1.6;
         margin-top: 15px;
@@ -148,32 +156,53 @@ st.markdown(
     }
 
 
-    /* Emphasized word */
+    /* ======================================================
+       EMPHASIZED WORD
+       ====================================================== */
 
     .emphasis-word {
-        color: #d00000;
+        color: #ff3333;
         font-weight: 700;
         text-decoration: underline;
     }
 
 
-    /* Translation instruction */
+    /* ======================================================
+       TRANSLATION INSTRUCTION
+       ====================================================== */
 
     .translation-note {
         font-size: 15px;
-        color: #444444;
         margin-bottom: 10px;
     }
 
 
-    /* Progress */
+    /* ======================================================
+       PROGRESS TEXT
+       ====================================================== */
 
     .progress-text {
         text-align: center;
         font-size: 15px;
-        color: #444444;
         margin-bottom: 10px;
     }
+
+
+    /* ======================================================
+       RADIO OPTIONS
+       ====================================================== */
+
+    div[data-testid="stRadio"] > div {
+        gap: 12px;
+    }
+
+
+    /* Give translation choices more breathing room */
+
+    div[data-testid="stRadio"] label {
+        padding: 8px 4px;
+    }
+
 
     </style>
     """,
@@ -208,9 +237,9 @@ def load_questions():
     ]
 
     missing_columns = [
-        col
-        for col in required_columns
-        if col not in df.columns
+        column
+        for column in required_columns
+        if column not in df.columns
     ]
 
     if missing_columns:
@@ -344,7 +373,7 @@ def read_responses():
 
 
 # ============================================================
-# CHECK PARTICIPANT
+# CHECK WHETHER PARTICIPANT EXISTS
 # ============================================================
 
 def participant_exists(participant_name):
@@ -454,9 +483,9 @@ def load_participant_progress(participant_name):
     st.session_state.answers = answers
 
 
-    # --------------------------------------------------------
-    # Restore participant information
-    # --------------------------------------------------------
+    # ========================================================
+    # RESTORE PARTICIPANT INFORMATION
+    # ========================================================
 
     if not participant_rows.empty:
 
@@ -526,9 +555,9 @@ def load_participant_progress(participant_name):
         )
 
 
-    # --------------------------------------------------------
-    # Find first unanswered question
-    # --------------------------------------------------------
+    # ========================================================
+    # FIND FIRST UNANSWERED QUESTION
+    # ========================================================
 
     first_unanswered = len(questions)
 
@@ -550,7 +579,7 @@ def load_participant_progress(participant_name):
 
 
 # ============================================================
-# SAVE / APPEND RESPONSE
+# SAVE RESPONSE TO GOOGLE SHEETS
 # ============================================================
 
 def save_progress(sample_id):
@@ -597,32 +626,54 @@ def save_progress(sample_id):
 
         str(sample_id),
 
-        str(row["english sentence"]),
+        str(
+            row["english sentence"]
+        ),
 
-        str(row["emphasized word"]),
+        str(
+            row["emphasized word"]
+        ),
 
-        str(row["audiofile"]),
+        str(
+            row["audiofile"]
+        ),
 
-        answer["selected_translation"],
+        answer[
+            "selected_translation"
+        ],
 
-        answer["selected_translation_type"],
+        answer[
+            "selected_translation_type"
+        ],
 
-        answer["emphasis_rating"],
+        answer[
+            "emphasis_rating"
+        ],
 
-        answer["response_time_seconds"],
+        answer[
+            "response_time_seconds"
+        ],
 
         datetime.now().strftime(
             "%Y-%m-%d %H:%M:%S"
         )
     ]
 
+
     try:
 
-        all_values = worksheet.get_all_values()
+        # ====================================================
+        # READ CURRENT SHEET
+        # ====================================================
 
-        # ----------------------------------------------------
-        # Empty sheet
-        # ----------------------------------------------------
+        all_values = (
+            worksheet.get_all_values()
+        )
+
+
+        # ====================================================
+        # EMPTY SHEET
+        # ====================================================
 
         if len(all_values) <= 1:
 
@@ -636,6 +687,7 @@ def save_progress(sample_id):
 
         header = all_values[0]
 
+
         participant_index = (
             header.index(
                 "participant_name"
@@ -648,12 +700,13 @@ def save_progress(sample_id):
             )
         )
 
+
         existing_row_number = None
 
 
-        # ----------------------------------------------------
-        # Find existing participant + question
-        # ----------------------------------------------------
+        # ====================================================
+        # FIND EXISTING RESPONSE
+        # ====================================================
 
         for row_number, existing_row in enumerate(
             all_values[1:],
@@ -665,7 +718,11 @@ def save_progress(sample_id):
             existing_sample = ""
 
 
-            if participant_index < len(existing_row):
+            if (
+                participant_index
+                <
+                len(existing_row)
+            ):
 
                 existing_participant = (
                     str(
@@ -678,7 +735,11 @@ def save_progress(sample_id):
                 )
 
 
-            if sample_index < len(existing_row):
+            if (
+                sample_index
+                <
+                len(existing_row)
+            ):
 
                 existing_sample = (
                     str(
@@ -707,9 +768,9 @@ def save_progress(sample_id):
                 break
 
 
-        # ----------------------------------------------------
-        # Update existing response
-        # ----------------------------------------------------
+        # ====================================================
+        # UPDATE EXISTING RESPONSE
+        # ====================================================
 
         if existing_row_number is not None:
 
@@ -720,9 +781,9 @@ def save_progress(sample_id):
             )
 
 
-        # ----------------------------------------------------
-        # Append new response
-        # ----------------------------------------------------
+        # ====================================================
+        # APPEND NEW RESPONSE
+        # ====================================================
 
         else:
 
@@ -755,13 +816,14 @@ def highlight_emphasis(
         emphasized
     ).strip()
 
+
     if not emphasized:
 
         return sentence
 
 
-    # Support both comma and slash separated
-    # emphasized words/phrases.
+    # Support comma-separated and
+    # slash-separated emphasized words.
 
     words = [
         emphasized
@@ -778,15 +840,20 @@ def highlight_emphasis(
         for word in words:
 
             new_words.extend(
-                word.split(separator)
+                word.split(
+                    separator
+                )
             )
 
         words = new_words
 
 
     words = [
+
         word.strip()
+
         for word in words
+
         if word.strip()
     ]
 
@@ -836,6 +903,7 @@ def get_randomized_options(
         + str(sample_id)
     )
 
+
     seed = int(
         hashlib.sha256(
             seed_string.encode(
@@ -845,13 +913,18 @@ def get_randomized_options(
         16
     )
 
-    rng = random.Random(seed)
+
+    rng = random.Random(
+        seed
+    )
+
 
     shuffled = options.copy()
 
     rng.shuffle(
         shuffled
     )
+
 
     return shuffled
 
@@ -984,11 +1057,13 @@ if st.session_state.page == "welcome":
 
         else:
 
-            st.session_state.participant_name = name
+            st.session_state.participant_name = (
+                name
+            )
 
 
             # ------------------------------------------------
-            # Existing participant
+            # EXISTING PARTICIPANT
             # ------------------------------------------------
 
             if participant_exists(name):
@@ -1020,7 +1095,7 @@ if st.session_state.page == "welcome":
 
 
             # ------------------------------------------------
-            # New participant
+            # NEW PARTICIPANT
             # ------------------------------------------------
 
             else:
@@ -1039,6 +1114,7 @@ if st.session_state.page == "welcome":
             st.session_state.participant_start_time = (
                 datetime.now()
             )
+
 
             st.rerun()
 
@@ -1063,6 +1139,10 @@ elif st.session_state.page == "participant_info":
     )
 
 
+    # --------------------------------------------------------
+    # AGE
+    # --------------------------------------------------------
+
     age_options = [
 
         "18–20",
@@ -1075,21 +1155,30 @@ elif st.session_state.page == "participant_info":
 
 
     current_age = (
+
         st.session_state.age_range
+
         if st.session_state.age_range
         in age_options
+
         else age_options[0]
     )
 
 
-    st.session_state.age_range = st.selectbox(
-        "Age range",
-        age_options,
-        index=age_options.index(
-            current_age
+    st.session_state.age_range = (
+        st.selectbox(
+            "Age range",
+            age_options,
+            index=age_options.index(
+                current_age
+            )
         )
     )
 
+
+    # --------------------------------------------------------
+    # NATIVE LANGUAGE
+    # --------------------------------------------------------
 
     st.session_state.native_language = (
         st.text_input(
@@ -1098,6 +1187,10 @@ elif st.session_state.page == "participant_info":
         )
     )
 
+
+    # --------------------------------------------------------
+    # ENGLISH PROFICIENCY
+    # --------------------------------------------------------
 
     english_options = [
 
@@ -1109,9 +1202,12 @@ elif st.session_state.page == "participant_info":
 
 
     current_english = (
+
         st.session_state.english_proficiency
+
         if st.session_state.english_proficiency
         in english_options
+
         else english_options[0]
     )
 
@@ -1127,6 +1223,10 @@ elif st.session_state.page == "participant_info":
     )
 
 
+    # --------------------------------------------------------
+    # HINDI PROFICIENCY
+    # --------------------------------------------------------
+
     hindi_options = [
 
         "Beginner",
@@ -1137,9 +1237,12 @@ elif st.session_state.page == "participant_info":
 
 
     current_hindi = (
+
         st.session_state.hindi_proficiency
+
         if st.session_state.hindi_proficiency
         in hindi_options
+
         else hindi_options[0]
     )
 
@@ -1155,6 +1258,10 @@ elif st.session_state.page == "participant_info":
     )
 
 
+    # --------------------------------------------------------
+    # HEADPHONES
+    # --------------------------------------------------------
+
     headphones_options = [
         "Yes",
         "No"
@@ -1162,21 +1269,30 @@ elif st.session_state.page == "participant_info":
 
 
     current_headphones = (
+
         st.session_state.headphones
+
         if st.session_state.headphones
         in headphones_options
+
         else headphones_options[0]
     )
 
 
-    st.session_state.headphones = st.radio(
-        "Are you using headphones or earphones?",
-        headphones_options,
-        index=headphones_options.index(
-            current_headphones
+    st.session_state.headphones = (
+        st.radio(
+            "Are you using headphones or earphones?",
+            headphones_options,
+            index=headphones_options.index(
+                current_headphones
+            )
         )
     )
 
+
+    # --------------------------------------------------------
+    # HEARING DIFFICULTIES
+    # --------------------------------------------------------
 
     hearing_options = [
         "No",
@@ -1185,9 +1301,12 @@ elif st.session_state.page == "participant_info":
 
 
     current_hearing = (
+
         st.session_state.hearing_difficulties
+
         if st.session_state.hearing_difficulties
         in hearing_options
+
         else hearing_options[0]
     )
 
@@ -1203,6 +1322,10 @@ elif st.session_state.page == "participant_info":
     )
 
 
+    # --------------------------------------------------------
+    # SPEECH / LINGUISTICS EXPERIENCE
+    # --------------------------------------------------------
+
     experience_options = [
         "No",
         "Yes"
@@ -1210,9 +1333,12 @@ elif st.session_state.page == "participant_info":
 
 
     current_experience = (
+
         st.session_state.speech_experience
+
         if st.session_state.speech_experience
         in experience_options
+
         else experience_options[0]
     )
 
@@ -1229,6 +1355,10 @@ elif st.session_state.page == "participant_info":
     )
 
 
+    # --------------------------------------------------------
+    # PROSODY FAMILIARITY
+    # --------------------------------------------------------
+
     prosody_options = [
 
         "Not familiar",
@@ -1239,9 +1369,12 @@ elif st.session_state.page == "participant_info":
 
 
     current_prosody = (
+
         st.session_state.prosody_understanding
+
         if st.session_state.prosody_understanding
         in prosody_options
+
         else prosody_options[0]
     )
 
@@ -1258,6 +1391,10 @@ elif st.session_state.page == "participant_info":
     )
 
 
+    # --------------------------------------------------------
+    # PREVIOUS LISTENING TEST EXPERIENCE
+    # --------------------------------------------------------
+
     listening_options = [
         "No",
         "Yes"
@@ -1265,9 +1402,12 @@ elif st.session_state.page == "participant_info":
 
 
     current_listening = (
+
         st.session_state.listening_test_experience
+
         if st.session_state.listening_test_experience
         in listening_options
+
         else listening_options[0]
     )
 
@@ -1381,9 +1521,11 @@ elif st.session_state.page == "instructions":
             "experiment"
         )
 
+
         st.session_state.question_start_times[
             st.session_state.current_question
         ] = datetime.now()
+
 
         st.rerun()
 
@@ -1404,7 +1546,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Safety check
+    # SAFETY CHECK
     # --------------------------------------------------------
 
     if question_index >= total_questions:
@@ -1432,7 +1574,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Progress
+    # PROGRESS
     # --------------------------------------------------------
 
     st.progress(
@@ -1452,7 +1594,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # English sentence
+    # ENGLISH SENTENCE
     # --------------------------------------------------------
 
     st.markdown(
@@ -1490,7 +1632,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Emphasized word
+    # EMPHASIZED WORD
     # --------------------------------------------------------
 
     if str(
@@ -1507,7 +1649,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Audio
+    # AUDIO
     # --------------------------------------------------------
 
     audio_filename = str(
@@ -1539,7 +1681,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Translation options
+    # TRANSLATION OPTIONS
     # --------------------------------------------------------
 
     st.markdown("---")
@@ -1598,7 +1740,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Stable randomization
+    # RANDOMIZE OPTIONS
     # --------------------------------------------------------
 
     if sample_id not in (
@@ -1612,6 +1754,7 @@ elif st.session_state.page == "experiment":
                 valid_options
             )
         )
+
 
         st.session_state.randomized_options[
             sample_id
@@ -1634,7 +1777,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Previous answer
+    # PREVIOUS ANSWER
     # --------------------------------------------------------
 
     existing_answer = (
@@ -1681,7 +1824,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Translation selection
+    # TRANSLATION RADIO
     # --------------------------------------------------------
 
     selected_translation = st.radio(
@@ -1700,7 +1843,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Emphasis rating
+    # EMPHASIS RATING
     # --------------------------------------------------------
 
     st.markdown("---")
@@ -1753,7 +1896,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Start timer
+    # START TIMER
     # --------------------------------------------------------
 
     if question_index not in (
@@ -1766,7 +1909,7 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # Navigation buttons
+    # NAVIGATION
     # --------------------------------------------------------
 
     st.markdown("---")
@@ -1786,9 +1929,11 @@ elif st.session_state.page == "experiment":
 
                 st.session_state.current_question -= 1
 
+
                 st.session_state.question_start_times[
                     st.session_state.current_question
                 ] = datetime.now()
+
 
                 st.rerun()
 
@@ -1818,7 +1963,7 @@ elif st.session_state.page == "experiment":
         ):
 
             # ------------------------------------------------
-            # Validation
+            # VALIDATION
             # ------------------------------------------------
 
             if selected_translation is None:
@@ -1840,7 +1985,7 @@ elif st.session_state.page == "experiment":
 
 
             # ------------------------------------------------
-            # Response time
+            # RESPONSE TIME
             # ------------------------------------------------
 
             start_time = (
@@ -1859,7 +2004,7 @@ elif st.session_state.page == "experiment":
 
 
             # ------------------------------------------------
-            # Identify hidden source
+            # IDENTIFY SOURCE
             # ------------------------------------------------
 
             selected_source = ""
@@ -1867,7 +2012,11 @@ elif st.session_state.page == "experiment":
 
             for source, text in shuffled_options:
 
-                if text == selected_translation:
+                if (
+                    text
+                    ==
+                    selected_translation
+                ):
 
                     selected_source = (
                         source
@@ -1877,7 +2026,7 @@ elif st.session_state.page == "experiment":
 
 
             # ------------------------------------------------
-            # Store answer
+            # SAVE IN SESSION
             # ------------------------------------------------
 
             st.session_state.answers[
@@ -1902,7 +2051,7 @@ elif st.session_state.page == "experiment":
 
 
             # ------------------------------------------------
-            # Save to Google Sheets
+            # SAVE TO GOOGLE SHEETS
             # ------------------------------------------------
 
             save_progress(
@@ -1911,7 +2060,7 @@ elif st.session_state.page == "experiment":
 
 
             # ------------------------------------------------
-            # Move to next question
+            # MOVE FORWARD
             # ------------------------------------------------
 
             if (
@@ -1931,6 +2080,7 @@ elif st.session_state.page == "experiment":
             else:
 
                 st.session_state.current_question += 1
+
 
                 st.session_state.question_start_times[
                     st.session_state.current_question
