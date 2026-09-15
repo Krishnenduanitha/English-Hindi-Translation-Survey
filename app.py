@@ -38,7 +38,7 @@ AUDIO_FOLDER = os.path.join(
 
 
 # ============================================================
-# GOOGLE SHEETS CONFIGURATION
+# GOOGLE SHEETS
 # ============================================================
 
 SCOPES = [
@@ -61,17 +61,23 @@ def get_google_sheet():
             scopes=SCOPES
         )
 
-        client = gspread.authorize(credentials)
+        client = gspread.authorize(
+            credentials
+        )
 
-        spreadsheet_url = service_account_info["spreadsheet"]
+        spreadsheet_url = (
+            service_account_info["spreadsheet"]
+        )
 
         spreadsheet = client.open_by_url(
             spreadsheet_url
         )
 
-        worksheet_name = service_account_info.get(
-            "worksheet",
-            "Responses"
+        worksheet_name = (
+            service_account_info.get(
+                "worksheet",
+                "Responses"
+            )
         )
 
         worksheet = spreadsheet.worksheet(
@@ -94,7 +100,7 @@ worksheet = get_google_sheet()
 
 
 # ============================================================
-# CUSTOM CSS
+# CSS
 # ============================================================
 
 st.markdown(
@@ -102,7 +108,7 @@ st.markdown(
     <style>
 
     /* ======================================================
-       GENERAL TEXT
+       GENERAL
        ====================================================== */
 
     .main-title {
@@ -111,7 +117,6 @@ st.markdown(
         font-weight: 700;
         margin-bottom: 10px;
         line-height: 1.3;
-        color: var(--text-color);
     }
 
 
@@ -121,7 +126,6 @@ st.markdown(
         font-weight: 500;
         margin-bottom: 30px;
         line-height: 1.5;
-        color: var(--text-color);
     }
 
 
@@ -131,12 +135,11 @@ st.markdown(
         margin-top: 20px;
         margin-bottom: 15px;
         line-height: 1.4;
-        color: var(--text-color);
     }
 
 
     /* ======================================================
-       ENGLISH SENTENCE
+       SENTENCE
        ====================================================== */
 
     .sentence-box {
@@ -162,13 +165,12 @@ st.markdown(
 
 
     /* ======================================================
-       TRANSLATION NOTE
+       TRANSLATION DESCRIPTION
        ====================================================== */
 
     .translation-note {
         font-size: 15px;
         margin-bottom: 14px;
-        color: var(--text-color);
     }
 
 
@@ -180,7 +182,6 @@ st.markdown(
         text-align: center;
         font-size: 15px;
         margin-bottom: 10px;
-        color: var(--text-color);
     }
 
 
@@ -191,52 +192,92 @@ st.markdown(
     /*
        IMPORTANT:
 
-       Only the container with key:
+       This CSS ONLY applies to the container:
 
            translation_cards
 
-       is affected by this CSS.
+       Therefore normal radio buttons used for:
+       - participant information
+       - emphasis rating
 
-       Therefore normal radio buttons elsewhere in the
-       questionnaire are NOT affected.
+       are NOT affected.
     */
+
 
     div.st-key-translation_cards button {
 
-        min-height: 110px !important;
-
         width: 100% !important;
+
+        min-height: 120px !important;
+
+        height: auto !important;
 
         border-radius: 12px !important;
 
-        padding: 20px 22px !important;
+        padding: 24px 24px !important;
 
-        font-size: 18px !important;
+        font-size: 19px !important;
 
         font-weight: 500 !important;
 
-        line-height: 1.5 !important;
+        line-height: 1.6 !important;
 
         text-align: left !important;
 
         white-space: normal !important;
 
-        word-wrap: break-word !important;
+        word-break: normal !important;
 
-        overflow-wrap: break-word !important;
+        overflow-wrap: anywhere !important;
+
+        text-overflow: clip !important;
+
+        overflow: visible !important;
+
+        display: flex !important;
+
+        align-items: center !important;
+
+        justify-content: flex-start !important;
 
         transition:
             background-color 0.2s ease,
             border-color 0.2s ease,
             transform 0.15s ease,
             box-shadow 0.2s ease !important;
-
-        margin-bottom: 8px !important;
     }
 
 
     /* ======================================================
-       TRANSLATION CARD HOVER
+       FORCE TEXT INSIDE BUTTON TO WRAP
+       ====================================================== */
+
+    div.st-key-translation_cards button p {
+
+        white-space: normal !important;
+
+        overflow: visible !important;
+
+        text-overflow: clip !important;
+
+        word-break: normal !important;
+
+        overflow-wrap: anywhere !important;
+
+        display: block !important;
+
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        line-height: 1.6 !important;
+
+        margin: 0 !important;
+    }
+
+
+    /* ======================================================
+       TRANSLATION HOVER
        ====================================================== */
 
     div.st-key-translation_cards
@@ -277,7 +318,7 @@ st.markdown(
 
 
     /* ======================================================
-       SELECTED TRANSLATION HOVER
+       SELECTED HOVER
        ====================================================== */
 
     div.st-key-translation_cards
@@ -292,18 +333,28 @@ st.markdown(
 
 
     /* ======================================================
-       MOBILE TRANSLATION CARDS
+       MOBILE
        ====================================================== */
 
     @media (max-width: 700px) {
 
         div.st-key-translation_cards button {
 
-            min-height: 85px !important;
+            min-height: 100px !important;
+
+            padding: 18px !important;
 
             font-size: 17px !important;
 
-            padding: 17px !important;
+            line-height: 1.5 !important;
+        }
+
+
+        div.st-key-translation_cards button p {
+
+            font-size: 17px !important;
+
+            line-height: 1.5 !important;
         }
     }
 
@@ -314,13 +365,15 @@ st.markdown(
 
 
 # ============================================================
-# LOAD QUESTIONS FROM EXCEL
+# LOAD QUESTIONS
 # ============================================================
 
 @st.cache_data
 def load_questions():
 
-    if not os.path.exists(EXCEL_FILE):
+    if not os.path.exists(
+        EXCEL_FILE
+    ):
 
         st.error(
             f"Excel file not found:\n{EXCEL_FILE}"
@@ -337,15 +390,10 @@ def load_questions():
     required_columns = [
 
         "sample id",
-
         "english sentence",
-
         "hindi translation",
-
         "machine translation",
-
         "emphasized word",
-
         "audiofile"
     ]
 
@@ -366,7 +414,9 @@ def load_questions():
             "The following required columns are missing "
             "from the Excel file:\n\n"
             +
-            "\n".join(missing_columns)
+            "\n".join(
+                missing_columns
+            )
         )
 
         st.stop()
@@ -445,6 +495,7 @@ def initialize_sheet():
                 value_input_option="USER_ENTERED"
             )
 
+
         elif len(values[0]) == 0:
 
             worksheet.append_row(
@@ -474,7 +525,9 @@ def read_responses():
 
     try:
 
-        records = worksheet.get_all_records()
+        records = (
+            worksheet.get_all_records()
+        )
 
 
         if not records:
@@ -502,7 +555,7 @@ def read_responses():
 
 
 # ============================================================
-# CHECK WHETHER PARTICIPANT EXISTS
+# CHECK PARTICIPANT
 # ============================================================
 
 def participant_exists(
@@ -517,13 +570,19 @@ def participant_exists(
         return False
 
 
-    if "participant_name" not in responses.columns:
+    if (
+        "participant_name"
+        not in
+        responses.columns
+    ):
 
         return False
 
 
     names = (
-        responses["participant_name"]
+        responses[
+            "participant_name"
+        ]
         .astype(str)
         .str.strip()
         .str.lower()
@@ -532,7 +591,8 @@ def participant_exists(
 
     return (
         participant_name.strip().lower()
-        in names.values
+        in
+        names.values
     )
 
 
@@ -556,7 +616,11 @@ def load_participant_progress(
         return
 
 
-    if "participant_name" not in responses.columns:
+    if (
+        "participant_name"
+        not in
+        responses.columns
+    ):
 
         st.session_state.answers = {}
 
@@ -566,7 +630,9 @@ def load_participant_progress(
 
 
     participant_rows = responses[
-        responses["participant_name"]
+        responses[
+            "participant_name"
+        ]
         .astype(str)
         .str.strip()
         .str.lower()
@@ -625,7 +691,9 @@ def load_participant_progress(
         }
 
 
-    st.session_state.answers = answers
+    st.session_state.answers = (
+        answers
+    )
 
 
     # ========================================================
@@ -740,7 +808,7 @@ def load_participant_progress(
 
 
 # ============================================================
-# SAVE RESPONSE TO GOOGLE SHEETS
+# SAVE RESPONSE
 # ============================================================
 
 def save_progress(
@@ -994,8 +1062,7 @@ def highlight_emphasis(
     ]
 
 
-    # Support comma-separated and slash-separated
-    # emphasized words/phrases.
+    # Handle comma-separated and slash-separated words.
 
     for separator in [
         ",",
@@ -1027,7 +1094,7 @@ def highlight_emphasis(
     ]
 
 
-    # Highlight longer phrases first.
+    # Longest phrases first.
 
     words = sorted(
         words,
@@ -1301,7 +1368,7 @@ if st.session_state.page == "welcome":
 
 
 # ============================================================
-# PARTICIPANT INFORMATION PAGE
+# PARTICIPANT INFORMATION
 # ============================================================
 
 elif st.session_state.page == "participant_info":
@@ -1364,7 +1431,9 @@ elif st.session_state.page == "participant_info":
     st.session_state.native_language = (
         st.text_input(
             "Native language(s)",
-            value=st.session_state.native_language
+            value=(
+                st.session_state.native_language
+            )
         )
     )
 
@@ -1621,7 +1690,7 @@ elif st.session_state.page == "participant_info":
 
 
 # ============================================================
-# INSTRUCTIONS PAGE
+# INSTRUCTIONS
 # ============================================================
 
 elif st.session_state.page == "instructions":
@@ -1650,12 +1719,12 @@ elif st.session_state.page == "instructions":
         3. Pay attention to how the indicated word or words
            are emphasized in the audio.
 
-        4. Choose the Hindi translation that you think best
-           matches the intended meaning of the English sentence,
-           while taking the emphasis into account.
-
-        5. Rate how strongly you perceive the indicated
+        4. First, rate how strongly you perceive the indicated
            English word or words to be emphasized in the audio.
+
+        5. Then choose the Hindi translation that you think
+           best matches the intended meaning of the English
+           sentence, while taking the emphasis into account.
 
         **Please keep the following in mind:**
 
@@ -1712,7 +1781,7 @@ elif st.session_state.page == "instructions":
 
 
 # ============================================================
-# EXPERIMENT PAGE
+# EXPERIMENT
 # ============================================================
 
 elif st.session_state.page == "experiment":
@@ -1863,7 +1932,120 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # TRANSLATION OPTIONS
+    # EXISTING ANSWER
+    # ========================================================
+
+    existing_answer = (
+        st.session_state.answers.get(
+            sample_id,
+            {}
+        )
+    )
+
+
+    previous_selection = (
+        existing_answer.get(
+            "selected_translation",
+            None
+        )
+    )
+
+
+    previous_rating = (
+        existing_answer.get(
+            "emphasis_rating",
+            None
+        )
+    )
+
+
+    try:
+
+        if previous_rating != "":
+
+            previous_rating = int(
+                float(
+                    previous_rating
+                )
+            )
+
+        else:
+
+            previous_rating = None
+
+    except Exception:
+
+        previous_rating = None
+
+
+    # ========================================================
+    # START QUESTION TIMER
+    # ========================================================
+
+    if question_index not in (
+        st.session_state.question_start_times
+    ):
+
+        st.session_state.question_start_times[
+            question_index
+        ] = datetime.now()
+
+
+    # ========================================================
+    # 1. EMPHASIS RATING FIRST
+    # ========================================================
+
+    st.markdown("---")
+
+
+    st.markdown(
+        "### How strongly did you perceive the "
+        "emphasized word(s) in the audio?"
+    )
+
+
+    rating_labels = {
+
+        1: "Not emphasized at all",
+
+        2: "Slightly emphasized",
+
+        3: "Moderately emphasized",
+
+        4: "Strongly emphasized",
+
+        5: "Very strongly emphasized"
+    }
+
+
+    rating_options = [
+        1,
+        2,
+        3,
+        4,
+        5
+    ]
+
+
+    emphasis_rating = st.radio(
+        "Emphasis rating",
+        rating_options,
+        index=(
+            rating_options.index(
+                previous_rating
+            )
+            if previous_rating
+            in rating_options
+            else None
+        ),
+        format_func=lambda x:
+            f"{x} — {rating_labels[x]}",
+        key=f"rating_{sample_id}"
+    )
+
+
+    # ========================================================
+    # 2. TRANSLATION OPTIONS SECOND
     # ========================================================
 
     st.markdown("---")
@@ -1884,7 +2066,7 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # TWO TRANSLATIONS
+    # TWO TRANSLATION OPTIONS
     # ========================================================
 
     options = [
@@ -1916,7 +2098,7 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # REQUIRE EXACTLY TWO OPTIONS
+    # EXACTLY TWO OPTIONS REQUIRED
     # ========================================================
 
     if len(valid_options) != 2:
@@ -1968,53 +2150,6 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # PREVIOUS ANSWER
-    # ========================================================
-
-    existing_answer = (
-        st.session_state.answers.get(
-            sample_id,
-            {}
-        )
-    )
-
-
-    previous_selection = (
-        existing_answer.get(
-            "selected_translation",
-            None
-        )
-    )
-
-
-    previous_rating = (
-        existing_answer.get(
-            "emphasis_rating",
-            None
-        )
-    )
-
-
-    try:
-
-        if previous_rating != "":
-
-            previous_rating = int(
-                float(
-                    previous_rating
-                )
-            )
-
-        else:
-
-            previous_rating = None
-
-    except Exception:
-
-        previous_rating = None
-
-
-    # ========================================================
     # INITIALIZE TRANSLATION SELECTION
     # ========================================================
 
@@ -2054,7 +2189,9 @@ elif st.session_state.page == "experiment":
 
         with col1:
 
-            option_text = display_texts[0]
+            option_text = (
+                display_texts[0]
+            )
 
 
             is_selected = (
@@ -2091,7 +2228,9 @@ elif st.session_state.page == "experiment":
 
         with col2:
 
-            option_text = display_texts[1]
+            option_text = (
+                display_texts[1]
+            )
 
 
             is_selected = (
@@ -2123,7 +2262,7 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # GET CURRENT SELECTION
+    # GET CURRENT TRANSLATION SELECTION
     # ========================================================
 
     selected_translation = (
@@ -2141,76 +2280,6 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # EMPHASIS RATING
-    # ========================================================
-
-    st.markdown("---")
-
-
-    st.markdown(
-        "### How strongly did you perceive the "
-        "emphasized word(s) in the audio?"
-    )
-
-
-    rating_labels = {
-
-        1: "Not emphasized at all",
-
-        2: "Slightly emphasized",
-
-        3: "Moderately emphasized",
-
-        4: "Strongly emphasized",
-
-        5: "Very strongly emphasized"
-    }
-
-
-    rating_options = [
-        1,
-        2,
-        3,
-        4,
-        5
-    ]
-
-
-    # ========================================================
-    # NORMAL RADIO
-    # ========================================================
-
-    emphasis_rating = st.radio(
-        "Emphasis rating",
-        rating_options,
-        index=(
-            rating_options.index(
-                previous_rating
-            )
-            if previous_rating
-            in rating_options
-            else None
-        ),
-        format_func=lambda x:
-            f"{x} — {rating_labels[x]}",
-        key=f"rating_{sample_id}"
-    )
-
-
-    # ========================================================
-    # START TIMER
-    # ========================================================
-
-    if question_index not in (
-        st.session_state.question_start_times
-    ):
-
-        st.session_state.question_start_times[
-            question_index
-        ] = datetime.now()
-
-
-    # ========================================================
     # NAVIGATION
     # ========================================================
 
@@ -2221,7 +2290,7 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # PREVIOUS BUTTON
+    # PREVIOUS
     # ========================================================
 
     with col1:
@@ -2276,19 +2345,19 @@ elif st.session_state.page == "experiment":
             # VALIDATION
             # =================================================
 
-            if selected_translation is None:
+            if emphasis_rating is None:
 
                 st.warning(
-                    "Please select a Hindi translation."
+                    "Please provide an emphasis rating."
                 )
 
                 st.stop()
 
 
-            if emphasis_rating is None:
+            if selected_translation is None:
 
                 st.warning(
-                    "Please provide an emphasis rating."
+                    "Please select a Hindi translation."
                 )
 
                 st.stop()
@@ -2370,7 +2439,7 @@ elif st.session_state.page == "experiment":
 
 
             # =================================================
-            # NEXT QUESTION
+            # MOVE FORWARD
             # =================================================
 
             if (
