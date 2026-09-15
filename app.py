@@ -95,7 +95,6 @@ worksheet = get_google_sheet()
 
 # ============================================================
 # CUSTOM CSS
-# DARK-MODE FRIENDLY
 # ============================================================
 
 st.markdown(
@@ -173,7 +172,7 @@ st.markdown(
 
     .translation-note {
         font-size: 15px;
-        margin-bottom: 10px;
+        margin-bottom: 14px;
     }
 
 
@@ -189,20 +188,127 @@ st.markdown(
 
 
     /* ======================================================
-       RADIO OPTIONS
+       TRANSLATION OPTION CARDS
        ====================================================== */
 
     div[data-testid="stRadio"] > div {
-        gap: 12px;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+        width: 100% !important;
     }
 
 
-    /* Give translation choices more breathing room */
+    /* Individual option */
 
     div[data-testid="stRadio"] label {
-        padding: 8px 4px;
+        border: 1px solid rgba(150, 150, 150, 0.45) !important;
+        border-radius: 12px !important;
+
+        padding: 22px 20px !important;
+
+        min-height: 90px !important;
+
+        display: flex !important;
+        align-items: center !important;
+
+        cursor: pointer !important;
+
+        transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.15s ease,
+            box-shadow 0.2s ease !important;
+
+        box-sizing: border-box !important;
     }
 
+
+    /* Hover */
+
+    div[data-testid="stRadio"] label:hover {
+        background-color: rgba(80, 140, 255, 0.12) !important;
+
+        border-color: rgba(80, 140, 255, 0.80) !important;
+
+        transform: translateY(-2px) !important;
+
+        box-shadow:
+            0 4px 12px rgba(80, 140, 255, 0.12) !important;
+    }
+
+
+    /* Option text */
+
+    div[data-testid="stRadio"] label p {
+        font-size: 18px !important;
+        line-height: 1.5 !important;
+        margin: 0 !important;
+    }
+
+
+    /* Radio button */
+
+    div[data-testid="stRadio"] label > div:first-child {
+        margin-right: 12px !important;
+    }
+
+
+    /* Selected option */
+
+    div[data-testid="stRadio"] label:has(
+        input:checked
+    ) {
+        background-color: rgba(80, 140, 255, 0.18) !important;
+
+        border-color: rgba(80, 140, 255, 0.95) !important;
+
+        box-shadow:
+            0 0 0 1px rgba(80, 140, 255, 0.20) !important;
+    }
+
+
+    /* Selected option hover */
+
+    div[data-testid="stRadio"] label:has(
+        input:checked
+    ):hover {
+        background-color: rgba(80, 140, 255, 0.25) !important;
+    }
+
+
+    /* ======================================================
+       MOBILE RESPONSIVENESS
+       ====================================================== */
+
+    @media (max-width: 700px) {
+
+        div[data-testid="stRadio"] > div {
+            grid-template-columns: 1fr !important;
+            gap: 14px !important;
+        }
+
+        div[data-testid="stRadio"] label {
+            min-height: 75px !important;
+            padding: 18px 16px !important;
+        }
+
+        div[data-testid="stRadio"] label p {
+            font-size: 17px !important;
+        }
+
+        .main-title {
+            font-size: 27px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+        }
+
+        .sentence-box {
+            font-size: 18px;
+        }
+    }
 
     </style>
     """,
@@ -225,7 +331,9 @@ def load_questions():
 
         st.stop()
 
-    df = pd.read_excel(EXCEL_FILE)
+    df = pd.read_excel(
+        EXCEL_FILE
+    )
 
     required_columns = [
         "sample id",
@@ -358,7 +466,9 @@ def read_responses():
                 columns=HEADERS
             )
 
-        return pd.DataFrame(records)
+        return pd.DataFrame(
+            records
+        )
 
     except Exception as e:
 
@@ -373,10 +483,12 @@ def read_responses():
 
 
 # ============================================================
-# CHECK WHETHER PARTICIPANT EXISTS
+# CHECK PARTICIPANT
 # ============================================================
 
-def participant_exists(participant_name):
+def participant_exists(
+    participant_name
+):
 
     responses = read_responses()
 
@@ -405,7 +517,9 @@ def participant_exists(participant_name):
 # LOAD PARTICIPANT PROGRESS
 # ============================================================
 
-def load_participant_progress(participant_name):
+def load_participant_progress(
+    participant_name
+):
 
     responses = read_responses()
 
@@ -417,6 +531,7 @@ def load_participant_progress(participant_name):
 
         return
 
+
     if "participant_name" not in responses.columns:
 
         st.session_state.answers = {}
@@ -424,6 +539,7 @@ def load_participant_progress(participant_name):
         st.session_state.current_question = 0
 
         return
+
 
     participant_rows = responses[
         responses["participant_name"]
@@ -434,7 +550,9 @@ def load_participant_progress(participant_name):
         participant_name.strip().lower()
     ]
 
+
     answers = {}
+
 
     for _, row in participant_rows.iterrows():
 
@@ -445,9 +563,11 @@ def load_participant_progress(participant_name):
             )
         ).strip()
 
+
         if not sample_id:
 
             continue
+
 
         answers[sample_id] = {
 
@@ -480,6 +600,7 @@ def load_participant_progress(participant_name):
                 )
         }
 
+
     st.session_state.answers = answers
 
 
@@ -489,7 +610,10 @@ def load_participant_progress(participant_name):
 
     if not participant_rows.empty:
 
-        latest_row = participant_rows.iloc[-1]
+        latest_row = (
+            participant_rows.iloc[-1]
+        )
+
 
         st.session_state.age_range = str(
             latest_row.get(
@@ -498,12 +622,14 @@ def load_participant_progress(participant_name):
             )
         )
 
+
         st.session_state.native_language = str(
             latest_row.get(
                 "native_language",
                 ""
             )
         )
+
 
         st.session_state.english_proficiency = str(
             latest_row.get(
@@ -512,12 +638,14 @@ def load_participant_progress(participant_name):
             )
         )
 
+
         st.session_state.hindi_proficiency = str(
             latest_row.get(
                 "hindi_proficiency",
                 ""
             )
         )
+
 
         st.session_state.headphones = str(
             latest_row.get(
@@ -526,12 +654,14 @@ def load_participant_progress(participant_name):
             )
         )
 
+
         st.session_state.hearing_difficulties = str(
             latest_row.get(
                 "hearing_difficulties",
                 ""
             )
         )
+
 
         st.session_state.speech_experience = str(
             latest_row.get(
@@ -540,12 +670,14 @@ def load_participant_progress(participant_name):
             )
         )
 
+
         st.session_state.prosody_understanding = str(
             latest_row.get(
                 "prosody_understanding",
                 ""
             )
         )
+
 
         st.session_state.listening_test_experience = str(
             latest_row.get(
@@ -559,7 +691,10 @@ def load_participant_progress(participant_name):
     # FIND FIRST UNANSWERED QUESTION
     # ========================================================
 
-    first_unanswered = len(questions)
+    first_unanswered = len(
+        questions
+    )
+
 
     for index, row in questions.iterrows():
 
@@ -567,11 +702,13 @@ def load_participant_progress(participant_name):
             row["sample id"]
         ).strip()
 
+
         if sample_id not in answers:
 
             first_unanswered = index
 
             break
+
 
     st.session_state.current_question = (
         first_unanswered
@@ -579,28 +716,34 @@ def load_participant_progress(participant_name):
 
 
 # ============================================================
-# SAVE RESPONSE TO GOOGLE SHEETS
+# SAVE RESPONSE
 # ============================================================
 
-def save_progress(sample_id):
+def save_progress(
+    sample_id
+):
 
     question_index = (
         st.session_state.current_question
     )
 
+
     row = questions.iloc[
         question_index
     ]
 
+
     participant_name = (
         st.session_state.participant_name
     )
+
 
     answer = (
         st.session_state.answers[
             str(sample_id)
         ]
     )
+
 
     new_row = [
 
@@ -663,7 +806,7 @@ def save_progress(sample_id):
     try:
 
         # ====================================================
-        # READ CURRENT SHEET
+        # GET CURRENT SHEET DATA
         # ====================================================
 
         all_values = (
@@ -693,6 +836,7 @@ def save_progress(sample_id):
                 "participant_name"
             )
         )
+
 
         sample_index = (
             header.index(
@@ -810,7 +954,10 @@ def highlight_emphasis(
     emphasized
 ):
 
-    sentence = str(sentence)
+    sentence = str(
+        sentence
+    )
+
 
     emphasized = str(
         emphasized
@@ -837,6 +984,7 @@ def highlight_emphasis(
 
         new_words = []
 
+
         for word in words:
 
             new_words.extend(
@@ -844,6 +992,7 @@ def highlight_emphasis(
                     separator
                 )
             )
+
 
         words = new_words
 
@@ -867,7 +1016,9 @@ def highlight_emphasis(
     )
 
 
-    highlighted_sentence = sentence
+    highlighted_sentence = (
+        sentence
+    )
 
 
     for word in words:
@@ -920,6 +1071,7 @@ def get_randomized_options(
 
 
     shuffled = options.copy()
+
 
     rng.shuffle(
         shuffled
@@ -1045,7 +1197,9 @@ if st.session_state.page == "welcome":
         use_container_width=True
     ):
 
-        name = name_input.strip()
+        name = (
+            name_input.strip()
+        )
 
 
         if not name:
@@ -1062,11 +1216,13 @@ if st.session_state.page == "welcome":
             )
 
 
-            # ------------------------------------------------
+            # =================================================
             # EXISTING PARTICIPANT
-            # ------------------------------------------------
+            # =================================================
 
-            if participant_exists(name):
+            if participant_exists(
+                name
+            ):
 
                 load_participant_progress(
                     name
@@ -1089,14 +1245,15 @@ if st.session_state.page == "welcome":
                         "experiment"
                     )
 
+
                     st.session_state.question_start_times[
                         st.session_state.current_question
                     ] = datetime.now()
 
 
-            # ------------------------------------------------
+            # =================================================
             # NEW PARTICIPANT
-            # ------------------------------------------------
+            # =================================================
 
             else:
 
@@ -1392,7 +1549,7 @@ elif st.session_state.page == "participant_info":
 
 
     # --------------------------------------------------------
-    # PREVIOUS LISTENING TEST EXPERIENCE
+    # PREVIOUS LISTENING TEST
     # --------------------------------------------------------
 
     listening_options = [
@@ -1539,6 +1696,7 @@ elif st.session_state.page == "experiment":
     question_index = (
         st.session_state.current_question
     )
+
 
     total_questions = len(
         questions
@@ -1824,11 +1982,11 @@ elif st.session_state.page == "experiment":
 
 
     # --------------------------------------------------------
-    # TRANSLATION RADIO
+    # TRANSLATION CARD OPTIONS
     # --------------------------------------------------------
 
     selected_translation = st.radio(
-        "Translation",
+        "",
         display_texts,
         index=(
             display_texts.index(
@@ -1838,7 +1996,8 @@ elif st.session_state.page == "experiment":
             in display_texts
             else None
         ),
-        key=f"translation_{sample_id}"
+        key=f"translation_{sample_id}",
+        label_visibility="collapsed"
     )
 
 
@@ -2004,7 +2163,7 @@ elif st.session_state.page == "experiment":
 
 
             # ------------------------------------------------
-            # IDENTIFY SOURCE
+            # IDENTIFY TRANSLATION SOURCE
             # ------------------------------------------------
 
             selected_source = ""
@@ -2026,7 +2185,7 @@ elif st.session_state.page == "experiment":
 
 
             # ------------------------------------------------
-            # SAVE IN SESSION
+            # STORE ANSWER
             # ------------------------------------------------
 
             st.session_state.answers[
@@ -2060,7 +2219,7 @@ elif st.session_state.page == "experiment":
 
 
             # ------------------------------------------------
-            # MOVE FORWARD
+            # MOVE TO NEXT QUESTION
             # ------------------------------------------------
 
             if (
