@@ -2840,8 +2840,8 @@ elif st.session_state.page == "remarks":
         We would appreciate any comments or remarks you
         may have about your experience with the study.
 
-        You may comment on the audio quality, translations,
-        emphasis, difficulty of the task, or anything else
+        You may comment on the understanding of the question, understanding of the translations,
+        emphasis understanding, difficulty of the task, or anything else
         you noticed during the experiment.
         """
     )
