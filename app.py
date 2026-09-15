@@ -24,7 +24,9 @@ st.set_page_config(
 # FILE PATHS
 # ============================================================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
 
 EXCEL_FILE = os.path.join(
     BASE_DIR,
@@ -38,7 +40,7 @@ AUDIO_FOLDER = os.path.join(
 
 
 # ============================================================
-# GOOGLE SHEETS
+# GOOGLE SHEETS CONFIGURATION
 # ============================================================
 
 SCOPES = [
@@ -56,9 +58,11 @@ def get_google_sheet():
             st.secrets["connections"]["gsheets"]
         )
 
-        credentials = Credentials.from_service_account_info(
-            service_account_info,
-            scopes=SCOPES
+        credentials = (
+            Credentials.from_service_account_info(
+                service_account_info,
+                scopes=SCOPES
+            )
         )
 
         client = gspread.authorize(
@@ -100,7 +104,133 @@ worksheet = get_google_sheet()
 
 
 # ============================================================
-# CSS
+# GOOGLE SHEET HEADERS
+# ============================================================
+
+HEADERS = [
+
+    "participant_name",
+
+    "age_range",
+
+    "native_language",
+
+    "english_proficiency",
+
+    "hindi_proficiency",
+
+    "headphones",
+
+    "hearing_difficulties",
+
+    "speech_experience",
+
+    "prosody_understanding",
+
+    "listening_test_experience",
+
+    "sample_id",
+
+    "english_sentence",
+
+    "emphasized_word",
+
+    "audiofile",
+
+    "selected_translation",
+
+    "selected_translation_type",
+
+    "emphasis_rating",
+
+    "response_time_seconds",
+
+    "remarks",
+
+    "last_updated"
+]
+
+
+# ============================================================
+# INITIALIZE GOOGLE SHEET
+# ============================================================
+
+def initialize_sheet():
+
+    try:
+
+        values = worksheet.get_all_values()
+
+
+        # ----------------------------------------------------
+        # Completely empty sheet
+        # ----------------------------------------------------
+
+        if not values:
+
+            worksheet.append_row(
+                HEADERS,
+                value_input_option="USER_ENTERED"
+            )
+
+            return
+
+
+        # ----------------------------------------------------
+        # Existing sheet
+        # ----------------------------------------------------
+
+        existing_headers = values[0]
+
+
+        # Add any missing columns.
+        #
+        # This is especially important for the new
+        # "remarks" column.
+
+        missing_headers = [
+
+            header
+
+            for header in HEADERS
+
+            if header not in existing_headers
+        ]
+
+
+        if missing_headers:
+
+            start_column = (
+                len(existing_headers) + 1
+            )
+
+
+            for offset, header in enumerate(
+                missing_headers
+            ):
+
+                worksheet.update_cell(
+                    1,
+                    start_column + offset,
+                    header
+                )
+
+
+    except Exception as e:
+
+        st.error(
+            "Could not initialize Google Sheet.\n\n"
+            f"{e}"
+        )
+
+        st.stop()
+
+
+initialize_sheet()
+
+
+# ============================================================
+# CUSTOM CSS
 # ============================================================
 
 st.markdown(
@@ -165,7 +295,7 @@ st.markdown(
 
 
     /* ======================================================
-       TRANSLATION DESCRIPTION
+       TRANSLATION NOTE
        ====================================================== */
 
     .translation-note {
@@ -192,17 +322,15 @@ st.markdown(
     /*
        IMPORTANT:
 
-       This CSS ONLY applies to the container:
+       This CSS is scoped ONLY to the translation card
+       container.
 
-           translation_cards
-
-       Therefore normal radio buttons used for:
+       Therefore the normal radio buttons used for:
        - participant information
        - emphasis rating
 
-       are NOT affected.
+       are not affected.
     */
-
 
     div.st-key-translation_cards button {
 
@@ -212,9 +340,11 @@ st.markdown(
 
         height: auto !important;
 
+        box-sizing: border-box !important;
+
         border-radius: 12px !important;
 
-        padding: 24px 24px !important;
+        padding: 22px 24px !important;
 
         font-size: 19px !important;
 
@@ -249,20 +379,20 @@ st.markdown(
 
 
     /* ======================================================
-       FORCE TEXT INSIDE BUTTON TO WRAP
+       FORCE TRANSLATION TEXT TO WRAP
        ====================================================== */
 
     div.st-key-translation_cards button p {
 
         white-space: normal !important;
 
-        overflow: visible !important;
-
-        text-overflow: clip !important;
-
         word-break: normal !important;
 
         overflow-wrap: anywhere !important;
+
+        text-overflow: clip !important;
+
+        overflow: visible !important;
 
         display: block !important;
 
@@ -276,12 +406,25 @@ st.markdown(
     }
 
 
+    div.st-key-translation_cards button div {
+
+        white-space: normal !important;
+
+        overflow: visible !important;
+
+        text-overflow: clip !important;
+
+        width: 100% !important;
+
+        max-width: 100% !important;
+    }
+
+
     /* ======================================================
        TRANSLATION HOVER
        ====================================================== */
 
-    div.st-key-translation_cards
-    button:hover {
+    div.st-key-translation_cards button:hover {
 
         background-color:
             rgba(80, 140, 255, 0.12) !important;
@@ -318,7 +461,7 @@ st.markdown(
 
 
     /* ======================================================
-       SELECTED HOVER
+       SELECTED TRANSLATION HOVER
        ====================================================== */
 
     div.st-key-translation_cards
@@ -365,7 +508,7 @@ st.markdown(
 
 
 # ============================================================
-# LOAD QUESTIONS
+# LOAD QUESTIONS FROM EXCEL
 # ============================================================
 
 @st.cache_data
@@ -390,10 +533,15 @@ def load_questions():
     required_columns = [
 
         "sample id",
+
         "english sentence",
+
         "hindi translation",
+
         "machine translation",
+
         "emphasized word",
+
         "audiofile"
     ]
 
@@ -432,92 +580,6 @@ questions = load_questions()
 
 
 # ============================================================
-# GOOGLE SHEET HEADERS
-# ============================================================
-
-HEADERS = [
-
-    "participant_name",
-
-    "age_range",
-
-    "native_language",
-
-    "english_proficiency",
-
-    "hindi_proficiency",
-
-    "headphones",
-
-    "hearing_difficulties",
-
-    "speech_experience",
-
-    "prosody_understanding",
-
-    "listening_test_experience",
-
-    "sample_id",
-
-    "english_sentence",
-
-    "emphasized_word",
-
-    "audiofile",
-
-    "selected_translation",
-
-    "selected_translation_type",
-
-    "emphasis_rating",
-
-    "response_time_seconds",
-
-    "last_updated"
-]
-
-
-# ============================================================
-# INITIALIZE GOOGLE SHEET
-# ============================================================
-
-def initialize_sheet():
-
-    try:
-
-        values = worksheet.get_all_values()
-
-
-        if not values:
-
-            worksheet.append_row(
-                HEADERS,
-                value_input_option="USER_ENTERED"
-            )
-
-
-        elif len(values[0]) == 0:
-
-            worksheet.append_row(
-                HEADERS,
-                value_input_option="USER_ENTERED"
-            )
-
-
-    except Exception as e:
-
-        st.error(
-            "Could not initialize Google Sheet:\n\n"
-            f"{e}"
-        )
-
-        st.stop()
-
-
-initialize_sheet()
-
-
-# ============================================================
 # READ RESPONSES
 # ============================================================
 
@@ -532,9 +594,7 @@ def read_responses():
 
         if not records:
 
-            return pd.DataFrame(
-                columns=HEADERS
-            )
+            return pd.DataFrame()
 
 
         return pd.DataFrame(
@@ -549,13 +609,11 @@ def read_responses():
             f"{e}"
         )
 
-        return pd.DataFrame(
-            columns=HEADERS
-        )
+        return pd.DataFrame()
 
 
 # ============================================================
-# CHECK PARTICIPANT
+# CHECK WHETHER PARTICIPANT EXISTS
 # ============================================================
 
 def participant_exists(
@@ -580,6 +638,7 @@ def participant_exists(
 
 
     names = (
+
         responses[
             "participant_name"
         ]
@@ -643,6 +702,10 @@ def load_participant_progress(
 
     answers = {}
 
+
+    # ========================================================
+    # RESTORE ANSWERS
+    # ========================================================
 
     for _, row in participant_rows.iterrows():
 
@@ -808,10 +871,10 @@ def load_participant_progress(
 
 
 # ============================================================
-# SAVE RESPONSE
+# CREATE RESPONSE DATA
 # ============================================================
 
-def save_progress(
+def create_response_data(
     sample_id
 ):
 
@@ -825,11 +888,6 @@ def save_progress(
     ]
 
 
-    participant_name = (
-        st.session_state.participant_name
-    )
-
-
     answer = (
         st.session_state.answers[
             str(sample_id)
@@ -837,62 +895,100 @@ def save_progress(
     )
 
 
-    new_row = [
+    response_data = {
 
-        participant_name,
+        "participant_name":
+            st.session_state.participant_name,
 
-        st.session_state.age_range,
+        "age_range":
+            st.session_state.age_range,
 
-        st.session_state.native_language,
+        "native_language":
+            st.session_state.native_language,
 
-        st.session_state.english_proficiency,
+        "english_proficiency":
+            st.session_state.english_proficiency,
 
-        st.session_state.hindi_proficiency,
+        "hindi_proficiency":
+            st.session_state.hindi_proficiency,
 
-        st.session_state.headphones,
+        "headphones":
+            st.session_state.headphones,
 
-        st.session_state.hearing_difficulties,
+        "hearing_difficulties":
+            st.session_state.hearing_difficulties,
 
-        st.session_state.speech_experience,
+        "speech_experience":
+            st.session_state.speech_experience,
 
-        st.session_state.prosody_understanding,
+        "prosody_understanding":
+            st.session_state.prosody_understanding,
 
-        st.session_state.listening_test_experience,
+        "listening_test_experience":
+            st.session_state.listening_test_experience,
 
-        str(sample_id),
+        "sample_id":
+            str(sample_id),
 
-        str(
-            row["english sentence"]
-        ),
+        "english_sentence":
+            str(
+                row["english sentence"]
+            ),
 
-        str(
-            row["emphasized word"]
-        ),
+        "emphasized_word":
+            str(
+                row["emphasized word"]
+            ),
 
-        str(
-            row["audiofile"]
-        ),
+        "audiofile":
+            str(
+                row["audiofile"]
+            ),
 
-        answer[
-            "selected_translation"
-        ],
+        "selected_translation":
+            answer[
+                "selected_translation"
+            ],
 
-        answer[
-            "selected_translation_type"
-        ],
+        "selected_translation_type":
+            answer[
+                "selected_translation_type"
+            ],
 
-        answer[
-            "emphasis_rating"
-        ],
+        "emphasis_rating":
+            answer[
+                "emphasis_rating"
+            ],
 
-        answer[
-            "response_time_seconds"
-        ],
+        "response_time_seconds":
+            answer[
+                "response_time_seconds"
+            ],
 
-        datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
-    ]
+        "remarks":
+            st.session_state.remarks,
+
+        "last_updated":
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+    }
+
+
+    return response_data
+
+
+# ============================================================
+# SAVE QUESTION RESPONSE
+# ============================================================
+
+def save_progress(
+    sample_id
+):
+
+    response_data = create_response_data(
+        sample_id
+    )
 
 
     try:
@@ -903,31 +999,94 @@ def save_progress(
 
 
         # ====================================================
-        # ONLY HEADER EXISTS
+        # GET CURRENT HEADERS
         # ====================================================
 
-        if len(all_values) <= 1:
+        if not all_values:
 
             worksheet.append_row(
-                new_row,
+                HEADERS,
                 value_input_option="USER_ENTERED"
             )
 
-            return
+            headers = HEADERS
+
+            all_values = [
+                HEADERS
+            ]
+
+        else:
+
+            headers = all_values[0]
 
 
-        header = all_values[0]
+        # ====================================================
+        # MAKE SURE ALL REQUIRED HEADERS EXIST
+        # ====================================================
 
+        missing_headers = [
+
+            header
+
+            for header in HEADERS
+
+            if header not in headers
+        ]
+
+
+        if missing_headers:
+
+            start_column = (
+                len(headers) + 1
+            )
+
+
+            for offset, header in enumerate(
+                missing_headers
+            ):
+
+                worksheet.update_cell(
+                    1,
+                    start_column + offset,
+                    header
+                )
+
+
+            headers = (
+                headers
+                +
+                missing_headers
+            )
+
+
+        # ====================================================
+        # BUILD ROW IN HEADER ORDER
+        # ====================================================
+
+        new_row = [
+
+            response_data.get(
+                header,
+                ""
+            )
+
+            for header in headers
+        ]
+
+
+        # ====================================================
+        # FIND EXISTING PARTICIPANT + SAMPLE
+        # ====================================================
 
         participant_index = (
-            header.index(
+            headers.index(
                 "participant_name"
             )
         )
 
 
         sample_index = (
-            header.index(
+            headers.index(
                 "sample_id"
             )
         )
@@ -935,10 +1094,6 @@ def save_progress(
 
         existing_row_number = None
 
-
-        # ====================================================
-        # FIND EXISTING RESPONSE
-        # ====================================================
 
         for row_number, existing_row in enumerate(
             all_values[1:],
@@ -986,7 +1141,9 @@ def save_progress(
             if (
                 existing_participant
                 ==
-                participant_name.strip().lower()
+                st.session_state.participant_name
+                .strip()
+                .lower()
                 and
                 existing_sample
                 ==
@@ -1006,8 +1163,18 @@ def save_progress(
 
         if existing_row_number is not None:
 
+            end_column_letter = (
+                gspread.utils.rowcol_to_a1(
+                    1,
+                    len(headers)
+                ).rstrip("1")
+            )
+
+
             worksheet.update(
-                f"A{existing_row_number}:S{existing_row_number}",
+                f"A{existing_row_number}:"
+                f"{end_column_letter}"
+                f"{existing_row_number}",
                 [new_row],
                 value_input_option="USER_ENTERED"
             )
@@ -1031,6 +1198,151 @@ def save_progress(
             "Your response could not be saved.\n\n"
             f"{e}"
         )
+
+
+# ============================================================
+# SAVE PARTICIPANT REMARKS
+# ============================================================
+
+def save_remarks():
+
+    participant_name = (
+        st.session_state.participant_name
+        .strip()
+        .lower()
+    )
+
+
+    remarks = (
+        st.session_state.remarks
+    )
+
+
+    try:
+
+        all_values = (
+            worksheet.get_all_values()
+        )
+
+
+        if not all_values:
+
+            return
+
+
+        headers = all_values[0]
+
+
+        # ----------------------------------------------------
+        # Make sure remarks column exists
+        # ----------------------------------------------------
+
+        if "remarks" not in headers:
+
+            worksheet.update_cell(
+                1,
+                len(headers) + 1,
+                "remarks"
+            )
+
+            headers.append(
+                "remarks"
+            )
+
+
+        remarks_index = (
+            headers.index(
+                "remarks"
+            )
+        )
+
+
+        participant_index = (
+            headers.index(
+                "participant_name"
+            )
+        )
+
+
+        last_updated_index = None
+
+
+        if "last_updated" in headers:
+
+            last_updated_index = (
+                headers.index(
+                    "last_updated"
+                )
+            )
+
+
+        # ====================================================
+        # UPDATE ALL ROWS FOR THIS PARTICIPANT
+        # ====================================================
+
+        for row_number, existing_row in enumerate(
+            all_values[1:],
+            start=2
+        ):
+
+            if (
+                participant_index
+                >=
+                len(existing_row)
+            ):
+
+                continue
+
+
+            existing_participant = (
+                str(
+                    existing_row[
+                        participant_index
+                    ]
+                )
+                .strip()
+                .lower()
+            )
+
+
+            if (
+                existing_participant
+                ==
+                participant_name
+            ):
+
+                worksheet.update_cell(
+                    row_number,
+                    remarks_index + 1,
+                    remarks
+                )
+
+
+                if (
+                    last_updated_index
+                    is not None
+                ):
+
+                    worksheet.update_cell(
+                        row_number,
+                        last_updated_index + 1,
+                        datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        )
+                    )
+
+
+    except Exception as e:
+
+        st.error(
+            "Unable to save your remarks.\n\n"
+            f"{e}"
+        )
+
+        return False
+
+
+    return True
 
 
 # ============================================================
@@ -1062,7 +1374,9 @@ def highlight_emphasis(
     ]
 
 
-    # Handle comma-separated and slash-separated words.
+    # --------------------------------------------------------
+    # Support comma-separated and slash-separated entries
+    # --------------------------------------------------------
 
     for separator in [
         ",",
@@ -1094,7 +1408,9 @@ def highlight_emphasis(
     ]
 
 
-    # Longest phrases first.
+    # --------------------------------------------------------
+    # Longest phrases first
+    # --------------------------------------------------------
 
     words = sorted(
         words,
@@ -1115,8 +1431,10 @@ def highlight_emphasis(
                 word,
                 (
                     "<span class='emphasis-word'>"
-                    + word
-                    + "</span>"
+                    +
+                    word
+                    +
+                    "</span>"
                 )
             )
         )
@@ -1136,9 +1454,13 @@ def get_randomized_options(
 ):
 
     seed_string = (
-        participant_name.strip().lower()
-        + "_"
-        + str(sample_id)
+        participant_name
+        .strip()
+        .lower()
+        +
+        "_"
+        +
+        str(sample_id)
     )
 
 
@@ -1157,7 +1479,9 @@ def get_randomized_options(
     )
 
 
-    shuffled = options.copy()
+    shuffled = (
+        options.copy()
+    )
 
 
     rng.shuffle(
@@ -1174,39 +1498,59 @@ def get_randomized_options(
 
 defaults = {
 
-    "page": "welcome",
+    "page":
+        "welcome",
 
-    "participant_name": "",
+    "participant_name":
+        "",
 
-    "participant_start_time": None,
+    "participant_start_time":
+        None,
 
-    "current_question": 0,
+    "current_question":
+        0,
 
-    "answers": {},
+    "answers":
+        {},
 
-    "randomized_options": {},
+    "randomized_options":
+        {},
 
-    "translation_selections": {},
+    "translation_selections":
+        {},
 
-    "question_start_times": {},
+    "question_start_times":
+        {},
 
-    "age_range": "",
+    "remarks":
+        "",
 
-    "native_language": "",
+    "age_range":
+        "",
 
-    "english_proficiency": "",
+    "native_language":
+        "",
 
-    "hindi_proficiency": "",
+    "english_proficiency":
+        "",
 
-    "headphones": "",
+    "hindi_proficiency":
+        "",
 
-    "hearing_difficulties": "",
+    "headphones":
+        "",
 
-    "speech_experience": "",
+    "hearing_difficulties":
+        "",
 
-    "prosody_understanding": "",
+    "speech_experience":
+        "",
 
-    "listening_test_experience": ""
+    "prosody_understanding":
+        "",
+
+    "listening_test_experience":
+        ""
 }
 
 
@@ -1250,12 +1594,15 @@ if st.session_state.page == "welcome":
 
         In each trial, you will listen to an English sentence
         containing one or more indicated emphasized words.
+        You will first rate how strongly you perceive the
+        indicated word or words to be emphasized in the audio.
         You will then choose the Hindi translation that you
         think best matches the intended meaning, taking the
         emphasis into account.
 
-        You will also rate how strongly you perceive the
-        indicated English word(s) to be emphasized in the audio.
+        Your responses will help us understand how prosodic
+        emphasis in English speech is reflected in
+        English-to-Hindi translation.
         """
     )
 
@@ -1320,7 +1667,8 @@ if st.session_state.page == "welcome":
 
                 if (
                     st.session_state.current_question
-                    >= len(questions)
+                    >=
+                    len(questions)
                 ):
 
                     st.session_state.page = (
@@ -1354,6 +1702,8 @@ if st.session_state.page == "welcome":
 
                 st.session_state.translation_selections = {}
 
+                st.session_state.remarks = ""
+
                 st.session_state.page = (
                     "participant_info"
                 )
@@ -1368,7 +1718,7 @@ if st.session_state.page == "welcome":
 
 
 # ============================================================
-# PARTICIPANT INFORMATION
+# PARTICIPANT INFORMATION PAGE
 # ============================================================
 
 elif st.session_state.page == "participant_info":
@@ -1690,7 +2040,7 @@ elif st.session_state.page == "participant_info":
 
 
 # ============================================================
-# INSTRUCTIONS
+# INSTRUCTIONS PAGE
 # ============================================================
 
 elif st.session_state.page == "instructions":
@@ -1781,7 +2131,7 @@ elif st.session_state.page == "instructions":
 
 
 # ============================================================
-# EXPERIMENT
+# EXPERIMENT PAGE
 # ============================================================
 
 elif st.session_state.page == "experiment":
@@ -1803,7 +2153,7 @@ elif st.session_state.page == "experiment":
     if question_index >= total_questions:
 
         st.session_state.page = (
-            "completed"
+            "remarks"
         )
 
         st.rerun()
@@ -1992,7 +2342,8 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # 1. EMPHASIS RATING FIRST
+    # EMPHASIS RATING
+    # FIRST
     # ========================================================
 
     st.markdown("---")
@@ -2045,7 +2396,8 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # 2. TRANSLATION OPTIONS SECOND
+    # TRANSLATION CHOICE
+    # SECOND
     # ========================================================
 
     st.markdown("---")
@@ -2098,7 +2450,7 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # EXACTLY TWO OPTIONS REQUIRED
+    # EXACTLY TWO OPTIONS
     # ========================================================
 
     if len(valid_options) != 2:
@@ -2262,7 +2614,7 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # GET CURRENT TRANSLATION SELECTION
+    # CURRENT SELECTION
     # ========================================================
 
     selected_translation = (
@@ -2430,7 +2782,7 @@ elif st.session_state.page == "experiment":
 
 
             # =================================================
-            # SAVE TO GOOGLE SHEETS
+            # SAVE RESPONSE
             # =================================================
 
             save_progress(
@@ -2439,7 +2791,7 @@ elif st.session_state.page == "experiment":
 
 
             # =================================================
-            # MOVE FORWARD
+            # NEXT QUESTION
             # =================================================
 
             if (
@@ -2453,7 +2805,7 @@ elif st.session_state.page == "experiment":
                 )
 
                 st.session_state.page = (
-                    "completed"
+                    "remarks"
                 )
 
             else:
@@ -2465,6 +2817,75 @@ elif st.session_state.page == "experiment":
                     st.session_state.current_question
                 ] = datetime.now()
 
+
+            st.rerun()
+
+
+# ============================================================
+# REMARKS PAGE
+# ============================================================
+
+elif st.session_state.page == "remarks":
+
+    st.markdown(
+        '<div class="main-title">'
+        'Thank You for Completing the Study'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
+    st.markdown(
+        """
+        We would appreciate any comments or remarks you
+        may have about your experience with the study.
+
+        You may comment on the audio quality, translations,
+        emphasis, difficulty of the task, or anything else
+        you noticed during the experiment.
+        """
+    )
+
+
+    st.markdown("---")
+
+
+    st.markdown(
+        "### Remarks"
+    )
+
+
+    remarks = st.text_area(
+        "Please enter your comments or remarks",
+        value=st.session_state.remarks,
+        placeholder=(
+            "Enter your remarks here..."
+        ),
+        height=180
+    )
+
+
+    st.session_state.remarks = (
+        remarks
+    )
+
+
+    st.markdown("---")
+
+
+    if st.button(
+        "Submit Remarks",
+        use_container_width=True
+    ):
+
+        success = save_remarks()
+
+
+        if success:
+
+            st.session_state.page = (
+                "completed"
+            )
 
             st.rerun()
 
@@ -2490,7 +2911,8 @@ elif st.session_state.page == "completed":
 
     st.markdown(
         """
-        Your responses have been recorded successfully.
+        Your responses and remarks have been recorded
+        successfully.
 
         You may now close this page.
         """
