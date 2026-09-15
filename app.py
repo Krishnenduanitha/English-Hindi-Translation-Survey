@@ -102,7 +102,7 @@ st.markdown(
     <style>
 
     /* ======================================================
-       MAIN TITLE
+       GENERAL TEXT
        ====================================================== */
 
     .main-title {
@@ -111,12 +111,9 @@ st.markdown(
         font-weight: 700;
         margin-bottom: 10px;
         line-height: 1.3;
+        color: var(--text-color);
     }
 
-
-    /* ======================================================
-       SUBTITLE
-       ====================================================== */
 
     .subtitle {
         text-align: center;
@@ -124,12 +121,9 @@ st.markdown(
         font-weight: 500;
         margin-bottom: 30px;
         line-height: 1.5;
+        color: var(--text-color);
     }
 
-
-    /* ======================================================
-       SECTION HEADINGS
-       ====================================================== */
 
     .section-title {
         font-size: 24px;
@@ -137,6 +131,7 @@ st.markdown(
         margin-top: 20px;
         margin-bottom: 15px;
         line-height: 1.4;
+        color: var(--text-color);
     }
 
 
@@ -167,52 +162,68 @@ st.markdown(
 
 
     /* ======================================================
-       TRANSLATION INSTRUCTION
+       TRANSLATION NOTE
        ====================================================== */
 
     .translation-note {
         font-size: 15px;
         margin-bottom: 14px;
+        color: var(--text-color);
     }
 
 
     /* ======================================================
-       PROGRESS TEXT
+       PROGRESS
        ====================================================== */
 
     .progress-text {
         text-align: center;
         font-size: 15px;
         margin-bottom: 10px;
+        color: var(--text-color);
     }
 
 
     /* ======================================================
-       TRANSLATION OPTION CARDS
+       TRANSLATION CARDS
        ====================================================== */
 
-    div[data-testid="stRadio"] > div {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 20px !important;
+    /*
+       IMPORTANT:
+
+       Only the container with key:
+
+           translation_cards
+
+       is affected by this CSS.
+
+       Therefore normal radio buttons elsewhere in the
+       questionnaire are NOT affected.
+    */
+
+    div.st-key-translation_cards button {
+
+        min-height: 110px !important;
+
         width: 100% !important;
-    }
 
-
-    /* Individual option */
-
-    div[data-testid="stRadio"] label {
-        border: 1px solid rgba(150, 150, 150, 0.45) !important;
         border-radius: 12px !important;
 
-        padding: 22px 20px !important;
+        padding: 20px 22px !important;
 
-        min-height: 90px !important;
+        font-size: 18px !important;
 
-        display: flex !important;
-        align-items: center !important;
+        font-weight: 500 !important;
 
-        cursor: pointer !important;
+        line-height: 1.5 !important;
+
+        text-align: left !important;
+
+        white-space: normal !important;
+
+        word-wrap: break-word !important;
+
+        overflow-wrap: break-word !important;
 
         transition:
             background-color 0.2s ease,
@@ -220,93 +231,79 @@ st.markdown(
             transform 0.15s ease,
             box-shadow 0.2s ease !important;
 
-        box-sizing: border-box !important;
-    }
-
-
-    /* Hover */
-
-    div[data-testid="stRadio"] label:hover {
-        background-color: rgba(80, 140, 255, 0.12) !important;
-
-        border-color: rgba(80, 140, 255, 0.80) !important;
-
-        transform: translateY(-2px) !important;
-
-        box-shadow:
-            0 4px 12px rgba(80, 140, 255, 0.12) !important;
-    }
-
-
-    /* Option text */
-
-    div[data-testid="stRadio"] label p {
-        font-size: 18px !important;
-        line-height: 1.5 !important;
-        margin: 0 !important;
-    }
-
-
-    /* Radio button */
-
-    div[data-testid="stRadio"] label > div:first-child {
-        margin-right: 12px !important;
-    }
-
-
-    /* Selected option */
-
-    div[data-testid="stRadio"] label:has(
-        input:checked
-    ) {
-        background-color: rgba(80, 140, 255, 0.18) !important;
-
-        border-color: rgba(80, 140, 255, 0.95) !important;
-
-        box-shadow:
-            0 0 0 1px rgba(80, 140, 255, 0.20) !important;
-    }
-
-
-    /* Selected option hover */
-
-    div[data-testid="stRadio"] label:has(
-        input:checked
-    ):hover {
-        background-color: rgba(80, 140, 255, 0.25) !important;
+        margin-bottom: 8px !important;
     }
 
 
     /* ======================================================
-       MOBILE RESPONSIVENESS
+       TRANSLATION CARD HOVER
+       ====================================================== */
+
+    div.st-key-translation_cards
+    button:hover {
+
+        background-color:
+            rgba(80, 140, 255, 0.12) !important;
+
+        border-color:
+            rgba(80, 140, 255, 0.85) !important;
+
+        transform:
+            translateY(-2px) !important;
+
+        box-shadow:
+            0 4px 12px
+            rgba(80, 140, 255, 0.15) !important;
+    }
+
+
+    /* ======================================================
+       SELECTED TRANSLATION
+       ====================================================== */
+
+    div.st-key-translation_cards
+    button[kind="primary"] {
+
+        background-color:
+            rgba(80, 140, 255, 0.20) !important;
+
+        border-color:
+            rgba(80, 140, 255, 0.95) !important;
+
+        box-shadow:
+            0 0 0 1px
+            rgba(80, 140, 255, 0.20) !important;
+    }
+
+
+    /* ======================================================
+       SELECTED TRANSLATION HOVER
+       ====================================================== */
+
+    div.st-key-translation_cards
+    button[kind="primary"]:hover {
+
+        background-color:
+            rgba(80, 140, 255, 0.28) !important;
+
+        border-color:
+            rgba(80, 140, 255, 1) !important;
+    }
+
+
+    /* ======================================================
+       MOBILE TRANSLATION CARDS
        ====================================================== */
 
     @media (max-width: 700px) {
 
-        div[data-testid="stRadio"] > div {
-            grid-template-columns: 1fr !important;
-            gap: 14px !important;
-        }
+        div.st-key-translation_cards button {
 
-        div[data-testid="stRadio"] label {
-            min-height: 75px !important;
-            padding: 18px 16px !important;
-        }
+            min-height: 85px !important;
 
-        div[data-testid="stRadio"] label p {
             font-size: 17px !important;
-        }
 
-        .main-title {
-            font-size: 27px;
-        }
-
-        .subtitle {
-            font-size: 16px;
-        }
-
-        .sentence-box {
-            font-size: 18px;
+            padding: 17px !important;
         }
     }
 
@@ -331,36 +328,52 @@ def load_questions():
 
         st.stop()
 
+
     df = pd.read_excel(
         EXCEL_FILE
     )
 
+
     required_columns = [
+
         "sample id",
+
         "english sentence",
+
         "hindi translation",
+
         "machine translation",
+
         "emphasized word",
+
         "audiofile"
     ]
 
+
     missing_columns = [
+
         column
+
         for column in required_columns
+
         if column not in df.columns
     ]
+
 
     if missing_columns:
 
         st.error(
             "The following required columns are missing "
             "from the Excel file:\n\n"
-            + "\n".join(missing_columns)
+            +
+            "\n".join(missing_columns)
         )
 
         st.stop()
 
+
     df = df.fillna("")
+
 
     return df
 
@@ -369,7 +382,7 @@ questions = load_questions()
 
 
 # ============================================================
-# GOOGLE SHEETS HEADERS
+# GOOGLE SHEET HEADERS
 # ============================================================
 
 HEADERS = [
@@ -424,6 +437,7 @@ def initialize_sheet():
 
         values = worksheet.get_all_values()
 
+
         if not values:
 
             worksheet.append_row(
@@ -438,10 +452,12 @@ def initialize_sheet():
                 value_input_option="USER_ENTERED"
             )
 
+
     except Exception as e:
 
         st.error(
-            f"Could not initialize Google Sheet:\n\n{e}"
+            "Could not initialize Google Sheet:\n\n"
+            f"{e}"
         )
 
         st.stop()
@@ -460,15 +476,18 @@ def read_responses():
 
         records = worksheet.get_all_records()
 
+
         if not records:
 
             return pd.DataFrame(
                 columns=HEADERS
             )
 
+
         return pd.DataFrame(
             records
         )
+
 
     except Exception as e:
 
@@ -483,7 +502,7 @@ def read_responses():
 
 
 # ============================================================
-# CHECK PARTICIPANT
+# CHECK WHETHER PARTICIPANT EXISTS
 # ============================================================
 
 def participant_exists(
@@ -492,13 +511,16 @@ def participant_exists(
 
     responses = read_responses()
 
+
     if responses.empty:
 
         return False
 
+
     if "participant_name" not in responses.columns:
 
         return False
+
 
     names = (
         responses["participant_name"]
@@ -506,6 +528,7 @@ def participant_exists(
         .str.strip()
         .str.lower()
     )
+
 
     return (
         participant_name.strip().lower()
@@ -522,6 +545,7 @@ def load_participant_progress(
 ):
 
     responses = read_responses()
+
 
     if responses.empty:
 
@@ -716,7 +740,7 @@ def load_participant_progress(
 
 
 # ============================================================
-# SAVE RESPONSE
+# SAVE RESPONSE TO GOOGLE SHEETS
 # ============================================================
 
 def save_progress(
@@ -805,17 +829,13 @@ def save_progress(
 
     try:
 
-        # ====================================================
-        # GET CURRENT SHEET DATA
-        # ====================================================
-
         all_values = (
             worksheet.get_all_values()
         )
 
 
         # ====================================================
-        # EMPTY SHEET
+        # ONLY HEADER EXISTS
         # ====================================================
 
         if len(all_values) <= 1:
@@ -926,7 +946,7 @@ def save_progress(
 
 
         # ====================================================
-        # APPEND NEW RESPONSE
+        # ADD NEW RESPONSE
         # ====================================================
 
         else:
@@ -969,13 +989,13 @@ def highlight_emphasis(
         return sentence
 
 
-    # Support comma-separated and
-    # slash-separated emphasized words.
-
     words = [
         emphasized
     ]
 
+
+    # Support comma-separated and slash-separated
+    # emphasized words/phrases.
 
     for separator in [
         ",",
@@ -1007,7 +1027,7 @@ def highlight_emphasis(
     ]
 
 
-    # Longer phrases first
+    # Highlight longer phrases first.
 
     words = sorted(
         words,
@@ -1098,6 +1118,8 @@ defaults = {
     "answers": {},
 
     "randomized_options": {},
+
+    "translation_selections": {},
 
     "question_start_times": {},
 
@@ -1263,6 +1285,8 @@ if st.session_state.page == "welcome":
 
                 st.session_state.randomized_options = {}
 
+                st.session_state.translation_selections = {}
+
                 st.session_state.page = (
                     "participant_info"
                 )
@@ -1296,9 +1320,9 @@ elif st.session_state.page == "participant_info":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # AGE
-    # --------------------------------------------------------
+    # ========================================================
 
     age_options = [
 
@@ -1333,9 +1357,9 @@ elif st.session_state.page == "participant_info":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # NATIVE LANGUAGE
-    # --------------------------------------------------------
+    # ========================================================
 
     st.session_state.native_language = (
         st.text_input(
@@ -1345,9 +1369,9 @@ elif st.session_state.page == "participant_info":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # ENGLISH PROFICIENCY
-    # --------------------------------------------------------
+    # ========================================================
 
     english_options = [
 
@@ -1380,9 +1404,9 @@ elif st.session_state.page == "participant_info":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # HINDI PROFICIENCY
-    # --------------------------------------------------------
+    # ========================================================
 
     hindi_options = [
 
@@ -1415,9 +1439,9 @@ elif st.session_state.page == "participant_info":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # HEADPHONES
-    # --------------------------------------------------------
+    # ========================================================
 
     headphones_options = [
         "Yes",
@@ -1447,9 +1471,9 @@ elif st.session_state.page == "participant_info":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # HEARING DIFFICULTIES
-    # --------------------------------------------------------
+    # ========================================================
 
     hearing_options = [
         "No",
@@ -1479,9 +1503,9 @@ elif st.session_state.page == "participant_info":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # SPEECH / LINGUISTICS EXPERIENCE
-    # --------------------------------------------------------
+    # ========================================================
 
     experience_options = [
         "No",
@@ -1512,9 +1536,9 @@ elif st.session_state.page == "participant_info":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # PROSODY FAMILIARITY
-    # --------------------------------------------------------
+    # ========================================================
 
     prosody_options = [
 
@@ -1548,9 +1572,9 @@ elif st.session_state.page == "participant_info":
     )
 
 
-    # --------------------------------------------------------
-    # PREVIOUS LISTENING TEST
-    # --------------------------------------------------------
+    # ========================================================
+    # LISTENING TEST EXPERIENCE
+    # ========================================================
 
     listening_options = [
         "No",
@@ -1703,9 +1727,9 @@ elif st.session_state.page == "experiment":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # SAFETY CHECK
-    # --------------------------------------------------------
+    # ========================================================
 
     if question_index >= total_questions:
 
@@ -1731,9 +1755,9 @@ elif st.session_state.page == "experiment":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # PROGRESS
-    # --------------------------------------------------------
+    # ========================================================
 
     st.progress(
         question_number
@@ -1751,9 +1775,9 @@ elif st.session_state.page == "experiment":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # ENGLISH SENTENCE
-    # --------------------------------------------------------
+    # ========================================================
 
     st.markdown(
         '<div class="section-title">'
@@ -1789,9 +1813,9 @@ elif st.session_state.page == "experiment":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # EMPHASIZED WORD
-    # --------------------------------------------------------
+    # ========================================================
 
     if str(
         emphasized_word
@@ -1806,9 +1830,9 @@ elif st.session_state.page == "experiment":
         )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # AUDIO
-    # --------------------------------------------------------
+    # ========================================================
 
     audio_filename = str(
         row["audiofile"]
@@ -1838,9 +1862,9 @@ elif st.session_state.page == "experiment":
         )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # TRANSLATION OPTIONS
-    # --------------------------------------------------------
+    # ========================================================
 
     st.markdown("---")
 
@@ -1858,6 +1882,10 @@ elif st.session_state.page == "experiment":
         unsafe_allow_html=True
     )
 
+
+    # ========================================================
+    # TWO TRANSLATIONS
+    # ========================================================
 
     options = [
 
@@ -1880,26 +1908,30 @@ elif st.session_state.page == "experiment":
     valid_options = [
 
         option
+
         for option in options
+
         if option[1]
     ]
 
 
-    if len(
-        valid_options
-    ) < 2:
+    # ========================================================
+    # REQUIRE EXACTLY TWO OPTIONS
+    # ========================================================
+
+    if len(valid_options) != 2:
 
         st.error(
-            "This question does not contain two valid "
-            "translation options."
+            "This question must contain exactly two "
+            "valid translation options."
         )
 
         st.stop()
 
 
-    # --------------------------------------------------------
-    # RANDOMIZE OPTIONS
-    # --------------------------------------------------------
+    # ========================================================
+    # STABLE RANDOMIZATION
+    # ========================================================
 
     if sample_id not in (
         st.session_state.randomized_options
@@ -1930,13 +1962,14 @@ elif st.session_state.page == "experiment":
     display_texts = [
 
         option[1]
+
         for option in shuffled_options
     ]
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # PREVIOUS ANSWER
-    # --------------------------------------------------------
+    # ========================================================
 
     existing_answer = (
         st.session_state.answers.get(
@@ -1981,29 +2014,135 @@ elif st.session_state.page == "experiment":
         previous_rating = None
 
 
-    # --------------------------------------------------------
-    # TRANSLATION CARD OPTIONS
-    # --------------------------------------------------------
+    # ========================================================
+    # INITIALIZE TRANSLATION SELECTION
+    # ========================================================
 
-    selected_translation = st.radio(
-        "",
-        display_texts,
-        index=(
-            display_texts.index(
-                previous_selection
-            )
-            if previous_selection
-            in display_texts
-            else None
-        ),
-        key=f"translation_{sample_id}",
-        label_visibility="collapsed"
+    if sample_id not in (
+        st.session_state.translation_selections
+    ):
+
+        st.session_state.translation_selections[
+            sample_id
+        ] = previous_selection
+
+
+    selected_translation = (
+        st.session_state.translation_selections[
+            sample_id
+        ]
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
+    # TRANSLATION CARDS
+    # ========================================================
+
+    with st.container(
+        key="translation_cards"
+    ):
+
+        col1, col2 = st.columns(
+            2,
+            gap="medium"
+        )
+
+
+        # ====================================================
+        # OPTION 1
+        # ====================================================
+
+        with col1:
+
+            option_text = display_texts[0]
+
+
+            is_selected = (
+                selected_translation
+                ==
+                option_text
+            )
+
+
+            if st.button(
+                option_text,
+                key=(
+                    f"translation_option_"
+                    f"{sample_id}_0"
+                ),
+                use_container_width=True,
+                type=(
+                    "primary"
+                    if is_selected
+                    else "secondary"
+                )
+            ):
+
+                st.session_state.translation_selections[
+                    sample_id
+                ] = option_text
+
+                st.rerun()
+
+
+        # ====================================================
+        # OPTION 2
+        # ====================================================
+
+        with col2:
+
+            option_text = display_texts[1]
+
+
+            is_selected = (
+                selected_translation
+                ==
+                option_text
+            )
+
+
+            if st.button(
+                option_text,
+                key=(
+                    f"translation_option_"
+                    f"{sample_id}_1"
+                ),
+                use_container_width=True,
+                type=(
+                    "primary"
+                    if is_selected
+                    else "secondary"
+                )
+            ):
+
+                st.session_state.translation_selections[
+                    sample_id
+                ] = option_text
+
+                st.rerun()
+
+
+    # ========================================================
+    # GET CURRENT SELECTION
+    # ========================================================
+
+    selected_translation = (
+        st.session_state.translation_selections[
+            sample_id
+        ]
+    )
+
+
+    if selected_translation is None:
+
+        st.info(
+            "Please select one of the two translations."
+        )
+
+
+    # ========================================================
     # EMPHASIS RATING
-    # --------------------------------------------------------
+    # ========================================================
 
     st.markdown("---")
 
@@ -2037,6 +2176,10 @@ elif st.session_state.page == "experiment":
     ]
 
 
+    # ========================================================
+    # NORMAL RADIO
+    # ========================================================
+
     emphasis_rating = st.radio(
         "Emphasis rating",
         rating_options,
@@ -2054,9 +2197,9 @@ elif st.session_state.page == "experiment":
     )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # START TIMER
-    # --------------------------------------------------------
+    # ========================================================
 
     if question_index not in (
         st.session_state.question_start_times
@@ -2067,15 +2210,19 @@ elif st.session_state.page == "experiment":
         ] = datetime.now()
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # NAVIGATION
-    # --------------------------------------------------------
+    # ========================================================
 
     st.markdown("---")
 
 
     col1, col2 = st.columns(2)
 
+
+    # ========================================================
+    # PREVIOUS BUTTON
+    # ========================================================
 
     with col1:
 
@@ -2096,6 +2243,10 @@ elif st.session_state.page == "experiment":
 
                 st.rerun()
 
+
+    # ========================================================
+    # NEXT / SUBMIT
+    # ========================================================
 
     with col2:
 
@@ -2121,9 +2272,9 @@ elif st.session_state.page == "experiment":
             use_container_width=True
         ):
 
-            # ------------------------------------------------
+            # =================================================
             # VALIDATION
-            # ------------------------------------------------
+            # =================================================
 
             if selected_translation is None:
 
@@ -2143,9 +2294,9 @@ elif st.session_state.page == "experiment":
                 st.stop()
 
 
-            # ------------------------------------------------
+            # =================================================
             # RESPONSE TIME
-            # ------------------------------------------------
+            # =================================================
 
             start_time = (
                 st.session_state.question_start_times.get(
@@ -2162,9 +2313,9 @@ elif st.session_state.page == "experiment":
             ).total_seconds()
 
 
-            # ------------------------------------------------
+            # =================================================
             # IDENTIFY TRANSLATION SOURCE
-            # ------------------------------------------------
+            # =================================================
 
             selected_source = ""
 
@@ -2184,9 +2335,9 @@ elif st.session_state.page == "experiment":
                     break
 
 
-            # ------------------------------------------------
+            # =================================================
             # STORE ANSWER
-            # ------------------------------------------------
+            # =================================================
 
             st.session_state.answers[
                 sample_id
@@ -2209,18 +2360,18 @@ elif st.session_state.page == "experiment":
             }
 
 
-            # ------------------------------------------------
+            # =================================================
             # SAVE TO GOOGLE SHEETS
-            # ------------------------------------------------
+            # =================================================
 
             save_progress(
                 sample_id
             )
 
 
-            # ------------------------------------------------
-            # MOVE TO NEXT QUESTION
-            # ------------------------------------------------
+            # =================================================
+            # NEXT QUESTION
+            # =================================================
 
             if (
                 question_index
