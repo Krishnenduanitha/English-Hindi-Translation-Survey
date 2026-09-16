@@ -154,7 +154,6 @@ def initialize_sheet():
 
         else:
 
-            # Make sure all required headers exist
             if existing_headers != HEADERS:
 
                 worksheet.update(
@@ -1042,111 +1041,144 @@ st.markdown(
 
 
 /* ============================================================
-   TRANSLATION CARDS
+   TRANSLATION OPTIONS
    ============================================================ */
 
 /*
-IMPORTANT:
-
-The radio widget key is:
-
-translation_choice_17
-translation_choice_62
-translation_choice_81
-etc.
-
-Therefore we use:
-
-[class*="st-key-translation_choice"]
-
-instead of:
-
-.st-key-translation_choice
+   We intentionally target the complete translation widget.
 */
 
+div[class*="st-key-translation_choice_"] {
+    width: 100% !important;
+}
 
-/* Radio group */
 
-div[class*="st-key-translation_choice"]
+/*
+   The two options must be vertically separated.
+*/
+
+div[class*="st-key-translation_choice_"]
 div[role="radiogroup"] {
 
     display: flex !important;
 
     flex-direction: column !important;
 
-    gap: 28px !important;
-
     width: 100% !important;
 
+    gap: 30px !important;
+
+    margin-top: 15px !important;
+
+    margin-bottom: 20px !important;
 }
 
 
-/* ============================================================
-   EACH OPTION IS A SEPARATE CARD
-   ============================================================ */
+/*
+   EACH OPTION IS ITS OWN BOX.
 
-div[class*="st-key-translation_choice"]
+   Do NOT use > label here because Streamlit can place
+   wrappers between the radiogroup and the label.
+*/
+
+div[class*="st-key-translation_choice_"]
 div[role="radiogroup"]
-> label {
+label {
 
     display: flex !important;
+
+    flex-direction: row !important;
 
     align-items: flex-start !important;
 
     width: 100% !important;
 
-    min-height: 100px !important;
+    min-height: 115px !important;
 
     box-sizing: border-box !important;
 
-    padding: 24px 28px !important;
+    padding: 26px 30px !important;
 
     margin: 0 !important;
 
     border: 2px solid #555b65 !important;
 
-    border-radius: 14px !important;
+    border-radius: 15px !important;
 
-    background: #15171c !important;
+    background-color: #15171c !important;
 
     cursor: pointer !important;
 
+    white-space: normal !important;
+
+    overflow: visible !important;
+
     transition:
-        background 0.2s ease,
+        background-color 0.2s ease,
         border-color 0.2s ease,
         box-shadow 0.2s ease,
         transform 0.2s ease !important;
 }
 
 
-/* ============================================================
+/*
    HOVER
-   ============================================================ */
+*/
 
-div[class*="st-key-translation_choice"]
+div[class*="st-key-translation_choice_"]
 div[role="radiogroup"]
-> label:hover {
+label:hover {
 
-    background: #1c2635 !important;
+    background-color: #1c2a3d !important;
 
     border-color: #4da3ff !important;
 
     box-shadow:
-        0 5px 18px rgba(77, 163, 255, 0.18) !important;
+        0 5px 18px rgba(77, 163, 255, 0.20) !important;
 
     transform: translateY(-2px) !important;
 }
 
 
-/* ============================================================
-   TEXT INSIDE CARD
-   ============================================================ */
+/*
+   RADIO BUTTON
+*/
 
-div[class*="st-key-translation_choice"]
+div[class*="st-key-translation_choice_"]
 div[role="radiogroup"]
-> label p {
+label input {
 
-    font-size: 20px !important;
+    flex: 0 0 auto !important;
+
+    width: 20px !important;
+
+    height: 20px !important;
+
+    margin-top: 5px !important;
+
+    margin-right: 18px !important;
+}
+
+
+/*
+   ALL TEXT INSIDE THE OPTION MUST WRAP.
+*/
+
+div[class*="st-key-translation_choice_"]
+div[role="radiogroup"]
+label p {
+
+    display: block !important;
+
+    width: 100% !important;
+
+    max-width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    font-size: 21px !important;
 
     line-height: 1.8 !important;
 
@@ -1154,66 +1186,80 @@ div[role="radiogroup"]
 
     overflow: visible !important;
 
-    text-overflow: unset !important;
+    text-overflow: clip !important;
 
     word-break: normal !important;
 
-    overflow-wrap: break-word !important;
-
-    width: 100% !important;
-
-    margin: 0 !important;
+    overflow-wrap: anywhere !important;
 }
 
 
-/* ============================================================
-   ALL CHILD ELEMENTS ALLOW TEXT TO WRAP
-   ============================================================ */
+/*
+   Force nested containers to allow the Hindi sentence
+   to occupy the full available width.
+*/
 
-div[class*="st-key-translation_choice"]
+div[class*="st-key-translation_choice_"]
 div[role="radiogroup"]
-> label
-div {
+label > div {
+
+    width: 100% !important;
 
     max-width: 100% !important;
 
     white-space: normal !important;
 
     overflow: visible !important;
-
 }
 
 
-/* ============================================================
-   RADIO BUTTON
-   ============================================================ */
-
-div[class*="st-key-translation_choice"]
-div[role="radiogroup"]
-> label
-input {
-
-    flex-shrink: 0 !important;
-
-    margin-top: 5px !important;
-}
-
-
-/* ============================================================
+/*
    SELECTED OPTION
-   ============================================================ */
+*/
 
-div[class*="st-key-translation_choice"]
+div[class*="st-key-translation_choice_"]
 div[role="radiogroup"]
-> label:has(input:checked) {
+label:has(input:checked) {
 
-    background: #172033 !important;
+    background-color: #18243a !important;
 
     border: 2px solid #4da3ff !important;
 
     box-shadow:
         0 0 0 1px #4da3ff,
-        0 6px 20px rgba(77, 163, 255, 0.18) !important;
+        0 6px 20px rgba(77, 163, 255, 0.20) !important;
+}
+
+
+/*
+   MOBILE
+*/
+
+@media (max-width: 768px) {
+
+    div[class*="st-key-translation_choice_"]
+    div[role="radiogroup"] {
+
+        gap: 20px !important;
+    }
+
+    div[class*="st-key-translation_choice_"]
+    div[role="radiogroup"]
+    label {
+
+        min-height: 100px !important;
+
+        padding: 20px 22px !important;
+    }
+
+    div[class*="st-key-translation_choice_"]
+    div[role="radiogroup"]
+    label p {
+
+        font-size: 18px !important;
+
+        line-height: 1.7 !important;
+    }
 }
 
 
@@ -1228,55 +1274,6 @@ audio {
     margin-top: 10px;
 
     margin-bottom: 20px;
-}
-
-
-/* ============================================================
-   MOBILE
-   ============================================================ */
-
-@media (max-width: 768px) {
-
-    .main-title {
-        font-size: 32px;
-    }
-
-    .subtitle {
-        font-size: 17px;
-    }
-
-    .sentence-box {
-        font-size: 18px;
-        padding: 17px;
-    }
-
-    div[class*="st-key-translation_choice"]
-    div[role="radiogroup"] {
-
-        gap: 20px !important;
-
-    }
-
-    div[class*="st-key-translation_choice"]
-    div[role="radiogroup"]
-    > label {
-
-        min-height: 90px !important;
-
-        padding: 18px 20px !important;
-
-    }
-
-    div[class*="st-key-translation_choice"]
-    div[role="radiogroup"]
-    > label p {
-
-        font-size: 17px !important;
-
-        line-height: 1.7 !important;
-
-    }
-
 }
 
 </style>
@@ -1924,7 +1921,7 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # ENSURE EXACTLY TWO OPTIONS
+    # ENSURE TWO OPTIONS
     # ========================================================
 
     if not hindi_translation:
@@ -1997,7 +1994,7 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # TRANSLATION RADIO
+    # TWO TRANSLATION OPTION BOXES
     # ========================================================
 
     selected_translation = st.radio(
