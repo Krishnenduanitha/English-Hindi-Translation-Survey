@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import random
 import hashlib
+import html
 import gspread
 
 from datetime import datetime
@@ -58,30 +59,22 @@ def get_google_sheet():
             st.secrets["connections"]["gsheets"]
         )
 
-        credentials = (
-            Credentials.from_service_account_info(
-                service_account_info,
-                scopes=SCOPES
-            )
+        credentials = Credentials.from_service_account_info(
+            service_account_info,
+            scopes=SCOPES
         )
 
-        client = gspread.authorize(
-            credentials
-        )
+        client = gspread.authorize(credentials)
 
-        spreadsheet_url = (
-            service_account_info["spreadsheet"]
-        )
+        spreadsheet_url = service_account_info["spreadsheet"]
 
         spreadsheet = client.open_by_url(
             spreadsheet_url
         )
 
-        worksheet_name = (
-            service_account_info.get(
-                "worksheet",
-                "Responses"
-            )
+        worksheet_name = service_account_info.get(
+            "worksheet",
+            "Responses"
         )
 
         worksheet = spreadsheet.worksheet(
@@ -137,11 +130,13 @@ HEADERS = [
 
     "audiofile",
 
+    "prosodic_feature",
+
     "selected_translation",
 
     "selected_translation_type",
 
-    "emphasis_rating",
+    "prosodic_rating",
 
     "response_time_seconds",
 
@@ -161,7 +156,6 @@ def initialize_sheet():
 
         values = worksheet.get_all_values()
 
-
         # ----------------------------------------------------
         # Completely empty sheet
         # ----------------------------------------------------
@@ -175,35 +169,21 @@ def initialize_sheet():
 
             return
 
-
         # ----------------------------------------------------
         # Existing sheet
         # ----------------------------------------------------
 
         existing_headers = values[0]
 
-
-        # Add any missing columns.
-        #
-        # This is especially important for the new
-        # "remarks" column.
-
         missing_headers = [
-
             header
-
             for header in HEADERS
-
             if header not in existing_headers
         ]
 
-
         if missing_headers:
 
-            start_column = (
-                len(existing_headers) + 1
-            )
-
+            start_column = len(existing_headers) + 1
 
             for offset, header in enumerate(
                 missing_headers
@@ -214,7 +194,6 @@ def initialize_sheet():
                     start_column + offset,
                     header
                 )
-
 
     except Exception as e:
 
@@ -249,7 +228,6 @@ st.markdown(
         line-height: 1.3;
     }
 
-
     .subtitle {
         text-align: center;
         font-size: 18px;
@@ -257,7 +235,6 @@ st.markdown(
         margin-bottom: 30px;
         line-height: 1.5;
     }
-
 
     .section-title {
         font-size: 24px;
@@ -295,7 +272,7 @@ st.markdown(
 
 
     /* ======================================================
-       TRANSLATION NOTE
+       TRANSLATION SECTION
        ====================================================== */
 
     .translation-note {
@@ -316,59 +293,41 @@ st.markdown(
 
 
     /* ======================================================
-       TRANSLATION CARDS
+       TRANSLATION RADIO CARDS
+       
+       IMPORTANT:
+       This CSS ONLY affects the translation radio widget.
+       Participant-information radios remain normal.
        ====================================================== */
 
-    /*
-       IMPORTANT:
+    div.st-key-translation_choice [role="radiogroup"] {
+        gap: 18px !important;
+    }
 
-       This CSS is scoped ONLY to the translation card
-       container.
-
-       Therefore the normal radio buttons used for:
-       - participant information
-       - emphasis rating
-
-       are not affected.
-    */
-
-    div.st-key-translation_cards button {
-
-        width: 100% !important;
-
-        min-height: 120px !important;
-
-        height: auto !important;
-
-        box-sizing: border-box !important;
-
-        border-radius: 12px !important;
-
-        padding: 22px 24px !important;
-
-        font-size: 19px !important;
-
-        font-weight: 500 !important;
-
-        line-height: 1.6 !important;
-
-        text-align: left !important;
-
-        white-space: normal !important;
-
-        word-break: normal !important;
-
-        overflow-wrap: anywhere !important;
-
-        text-overflow: clip !important;
-
-        overflow: visible !important;
+    div.st-key-translation_choice
+    [role="radiogroup"] > label {
 
         display: flex !important;
 
-        align-items: center !important;
+        align-items: flex-start !important;
 
-        justify-content: flex-start !important;
+        width: 100% !important;
+
+        min-height: 150px !important;
+
+        box-sizing: border-box !important;
+
+        padding: 28px 30px !important;
+
+        margin-bottom: 16px !important;
+
+        border: 1px solid rgba(128, 128, 128, 0.45) !important;
+
+        border-radius: 14px !important;
+
+        background-color: transparent !important;
+
+        cursor: pointer !important;
 
         transition:
             background-color 0.2s ease,
@@ -378,100 +337,56 @@ st.markdown(
     }
 
 
-    /* ======================================================
-       FORCE TRANSLATION TEXT TO WRAP
-       ====================================================== */
+    /* Hover */
 
-    div.st-key-translation_cards button p {
+    div.st-key-translation_choice
+    [role="radiogroup"] > label:hover {
+
+        background-color: rgba(80, 140, 255, 0.12) !important;
+
+        border-color: rgba(80, 140, 255, 0.85) !important;
+
+        transform: translateY(-2px) !important;
+
+        box-shadow:
+            0 4px 12px rgba(80, 140, 255, 0.15) !important;
+    }
+
+
+    /* Translation text */
+
+    div.st-key-translation_choice
+    [role="radiogroup"] > label p {
 
         white-space: normal !important;
+
+        overflow: visible !important;
+
+        text-overflow: clip !important;
 
         word-break: normal !important;
 
         overflow-wrap: anywhere !important;
 
-        text-overflow: clip !important;
+        line-height: 1.7 !important;
 
-        overflow: visible !important;
-
-        display: block !important;
-
-        width: 100% !important;
-
-        max-width: 100% !important;
-
-        line-height: 1.6 !important;
+        font-size: 19px !important;
 
         margin: 0 !important;
-    }
-
-
-    div.st-key-translation_cards button div {
-
-        white-space: normal !important;
-
-        overflow: visible !important;
-
-        text-overflow: clip !important;
 
         width: 100% !important;
-
-        max-width: 100% !important;
     }
 
 
-    /* ======================================================
-       TRANSLATION HOVER
-       ====================================================== */
+    /* Radio circle */
 
-    div.st-key-translation_cards button:hover {
+    div.st-key-translation_choice
+    [role="radiogroup"] > label
+    [data-baseweb="radio"] {
 
-        background-color:
-            rgba(80, 140, 255, 0.12) !important;
+        margin-top: 3px !important;
 
-        border-color:
-            rgba(80, 140, 255, 0.85) !important;
-
-        transform:
-            translateY(-2px) !important;
-
-        box-shadow:
-            0 4px 12px
-            rgba(80, 140, 255, 0.15) !important;
-    }
-
-
-    /* ======================================================
-       SELECTED TRANSLATION
-       ====================================================== */
-
-    div.st-key-translation_cards
-    button[kind="primary"] {
-
-        background-color:
-            rgba(80, 140, 255, 0.20) !important;
-
-        border-color:
-            rgba(80, 140, 255, 0.95) !important;
-
-        box-shadow:
-            0 0 0 1px
-            rgba(80, 140, 255, 0.20) !important;
-    }
-
-
-    /* ======================================================
-       SELECTED TRANSLATION HOVER
-       ====================================================== */
-
-    div.st-key-translation_cards
-    button[kind="primary"]:hover {
-
-        background-color:
-            rgba(80, 140, 255, 0.28) !important;
-
-        border-color:
-            rgba(80, 140, 255, 1) !important;
+        flex-shrink: 0 !important;
     }
 
 
@@ -481,24 +396,22 @@ st.markdown(
 
     @media (max-width: 700px) {
 
-        div.st-key-translation_cards button {
+        div.st-key-translation_choice
+        [role="radiogroup"] > label {
 
-            min-height: 100px !important;
+            min-height: 120px !important;
 
-            padding: 18px !important;
+            padding: 20px !important;
+        }
+
+        div.st-key-translation_choice
+        [role="radiogroup"] > label p {
 
             font-size: 17px !important;
 
-            line-height: 1.5 !important;
+            line-height: 1.6 !important;
         }
 
-
-        div.st-key-translation_cards button p {
-
-            font-size: 17px !important;
-
-            line-height: 1.5 !important;
-        }
     }
 
     </style>
@@ -514,9 +427,7 @@ st.markdown(
 @st.cache_data
 def load_questions():
 
-    if not os.path.exists(
-        EXCEL_FILE
-    ):
+    if not os.path.exists(EXCEL_FILE):
 
         st.error(
             f"Excel file not found:\n{EXCEL_FILE}"
@@ -524,11 +435,9 @@ def load_questions():
 
         st.stop()
 
-
     df = pd.read_excel(
         EXCEL_FILE
     )
-
 
     required_columns = [
 
@@ -545,7 +454,6 @@ def load_questions():
         "audiofile"
     ]
 
-
     missing_columns = [
 
         column
@@ -555,28 +463,66 @@ def load_questions():
         if column not in df.columns
     ]
 
-
     if missing_columns:
 
         st.error(
             "The following required columns are missing "
             "from the Excel file:\n\n"
             +
-            "\n".join(
-                missing_columns
-            )
+            "\n".join(missing_columns)
         )
 
         st.stop()
 
-
     df = df.fillna("")
-
 
     return df
 
 
 questions = load_questions()
+
+
+# ============================================================
+# DETECT PROSODIC FEATURE COLUMN
+# ============================================================
+
+def get_prosodic_feature(row):
+
+    possible_columns = [
+
+        "prosodic feature",
+
+        "prosodic_feature",
+
+        "feature",
+
+        "feature type",
+
+        "feature_type",
+
+        "prosody",
+
+        "prosody type",
+
+        "prosody_type"
+    ]
+
+    for column in possible_columns:
+
+        if column in row.index:
+
+            value = str(
+                row[column]
+            ).strip()
+
+            if value:
+
+                return value
+
+    # If the Excel does not have a separate feature column,
+    # do not invent a specific feature for the question.
+
+    return ""
 
 
 # ============================================================
@@ -587,20 +533,15 @@ def read_responses():
 
     try:
 
-        records = (
-            worksheet.get_all_records()
-        )
-
+        records = worksheet.get_all_records()
 
         if not records:
 
             return pd.DataFrame()
 
-
         return pd.DataFrame(
             records
         )
-
 
     except Exception as e:
 
@@ -616,29 +557,19 @@ def read_responses():
 # CHECK WHETHER PARTICIPANT EXISTS
 # ============================================================
 
-def participant_exists(
-    participant_name
-):
+def participant_exists(participant_name):
 
     responses = read_responses()
-
 
     if responses.empty:
 
         return False
 
-
-    if (
-        "participant_name"
-        not in
-        responses.columns
-    ):
+    if "participant_name" not in responses.columns:
 
         return False
 
-
     names = (
-
         responses[
             "participant_name"
         ]
@@ -647,11 +578,9 @@ def participant_exists(
         .str.lower()
     )
 
-
     return (
         participant_name.strip().lower()
-        in
-        names.values
+        in names.values
     )
 
 
@@ -659,12 +588,9 @@ def participant_exists(
 # LOAD PARTICIPANT PROGRESS
 # ============================================================
 
-def load_participant_progress(
-    participant_name
-):
+def load_participant_progress(participant_name):
 
     responses = read_responses()
-
 
     if responses.empty:
 
@@ -674,19 +600,13 @@ def load_participant_progress(
 
         return
 
-
-    if (
-        "participant_name"
-        not in
-        responses.columns
-    ):
+    if "participant_name" not in responses.columns:
 
         st.session_state.answers = {}
 
         st.session_state.current_question = 0
 
         return
-
 
     participant_rows = responses[
         responses[
@@ -699,9 +619,7 @@ def load_participant_progress(
         participant_name.strip().lower()
     ]
 
-
     answers = {}
-
 
     # ========================================================
     # RESTORE ANSWERS
@@ -716,11 +634,9 @@ def load_participant_progress(
             )
         ).strip()
 
-
         if not sample_id:
 
             continue
-
 
         answers[sample_id] = {
 
@@ -740,9 +656,9 @@ def load_participant_progress(
                     )
                 ),
 
-            "emphasis_rating":
+            "prosodic_rating":
                 row.get(
-                    "emphasis_rating",
+                    "prosodic_rating",
                     ""
                 ),
 
@@ -753,10 +669,7 @@ def load_participant_progress(
                 )
         }
 
-
-    st.session_state.answers = (
-        answers
-    )
+    st.session_state.answers = answers
 
 
     # ========================================================
@@ -765,10 +678,7 @@ def load_participant_progress(
 
     if not participant_rows.empty:
 
-        latest_row = (
-            participant_rows.iloc[-1]
-        )
-
+        latest_row = participant_rows.iloc[-1]
 
         st.session_state.age_range = str(
             latest_row.get(
@@ -777,14 +687,12 @@ def load_participant_progress(
             )
         )
 
-
         st.session_state.native_language = str(
             latest_row.get(
                 "native_language",
                 ""
             )
         )
-
 
         st.session_state.english_proficiency = str(
             latest_row.get(
@@ -793,14 +701,12 @@ def load_participant_progress(
             )
         )
 
-
         st.session_state.hindi_proficiency = str(
             latest_row.get(
                 "hindi_proficiency",
                 ""
             )
         )
-
 
         st.session_state.headphones = str(
             latest_row.get(
@@ -809,14 +715,12 @@ def load_participant_progress(
             )
         )
 
-
         st.session_state.hearing_difficulties = str(
             latest_row.get(
                 "hearing_difficulties",
                 ""
             )
         )
-
 
         st.session_state.speech_experience = str(
             latest_row.get(
@@ -825,7 +729,6 @@ def load_participant_progress(
             )
         )
 
-
         st.session_state.prosody_understanding = str(
             latest_row.get(
                 "prosody_understanding",
@@ -833,10 +736,18 @@ def load_participant_progress(
             )
         )
 
-
         st.session_state.listening_test_experience = str(
             latest_row.get(
                 "listening_test_experience",
+                ""
+            )
+        )
+
+        # Restore remarks if available
+
+        st.session_state.remarks = str(
+            latest_row.get(
+                "remarks",
                 ""
             )
         )
@@ -850,20 +761,17 @@ def load_participant_progress(
         questions
     )
 
-
     for index, row in questions.iterrows():
 
         sample_id = str(
             row["sample id"]
         ).strip()
 
-
         if sample_id not in answers:
 
             first_unanswered = index
 
             break
-
 
     st.session_state.current_question = (
         first_unanswered
@@ -874,26 +782,21 @@ def load_participant_progress(
 # CREATE RESPONSE DATA
 # ============================================================
 
-def create_response_data(
-    sample_id
-):
+def create_response_data(sample_id):
 
     question_index = (
         st.session_state.current_question
     )
 
-
     row = questions.iloc[
         question_index
     ]
-
 
     answer = (
         st.session_state.answers[
             str(sample_id)
         ]
     )
-
 
     response_data = {
 
@@ -945,6 +848,9 @@ def create_response_data(
                 row["audiofile"]
             ),
 
+        "prosodic_feature":
+            get_prosodic_feature(row),
+
         "selected_translation":
             answer[
                 "selected_translation"
@@ -955,9 +861,9 @@ def create_response_data(
                 "selected_translation_type"
             ],
 
-        "emphasis_rating":
+        "prosodic_rating":
             answer[
-                "emphasis_rating"
+                "prosodic_rating"
             ],
 
         "response_time_seconds":
@@ -974,7 +880,6 @@ def create_response_data(
             )
     }
 
-
     return response_data
 
 
@@ -982,21 +887,15 @@ def create_response_data(
 # SAVE QUESTION RESPONSE
 # ============================================================
 
-def save_progress(
-    sample_id
-):
+def save_progress(sample_id):
 
     response_data = create_response_data(
         sample_id
     )
 
-
     try:
 
-        all_values = (
-            worksheet.get_all_values()
-        )
-
+        all_values = worksheet.get_all_values()
 
         # ====================================================
         # GET CURRENT HEADERS
@@ -1021,7 +920,7 @@ def save_progress(
 
 
         # ====================================================
-        # MAKE SURE ALL REQUIRED HEADERS EXIST
+        # MAKE SURE REQUIRED HEADERS EXIST
         # ====================================================
 
         missing_headers = [
@@ -1033,13 +932,9 @@ def save_progress(
             if header not in headers
         ]
 
-
         if missing_headers:
 
-            start_column = (
-                len(headers) + 1
-            )
-
+            start_column = len(headers) + 1
 
             for offset, header in enumerate(
                 missing_headers
@@ -1051,7 +946,6 @@ def save_progress(
                     header
                 )
 
-
             headers = (
                 headers
                 +
@@ -1060,7 +954,7 @@ def save_progress(
 
 
         # ====================================================
-        # BUILD ROW IN HEADER ORDER
+        # BUILD ROW
         # ====================================================
 
         new_row = [
@@ -1078,22 +972,15 @@ def save_progress(
         # FIND EXISTING PARTICIPANT + SAMPLE
         # ====================================================
 
-        participant_index = (
-            headers.index(
-                "participant_name"
-            )
+        participant_index = headers.index(
+            "participant_name"
         )
 
-
-        sample_index = (
-            headers.index(
-                "sample_id"
-            )
+        sample_index = headers.index(
+            "sample_id"
         )
-
 
         existing_row_number = None
-
 
         for row_number, existing_row in enumerate(
             all_values[1:],
@@ -1104,11 +991,8 @@ def save_progress(
 
             existing_sample = ""
 
-
-            if (
-                participant_index
-                <
-                len(existing_row)
+            if participant_index < len(
+                existing_row
             ):
 
                 existing_participant = (
@@ -1121,11 +1005,8 @@ def save_progress(
                     .lower()
                 )
 
-
-            if (
-                sample_index
-                <
-                len(existing_row)
+            if sample_index < len(
+                existing_row
             ):
 
                 existing_sample = (
@@ -1136,7 +1017,6 @@ def save_progress(
                     )
                     .strip()
                 )
-
 
             if (
                 existing_participant
@@ -1170,7 +1050,6 @@ def save_progress(
                 ).rstrip("1")
             )
 
-
             worksheet.update(
                 f"A{existing_row_number}:"
                 f"{end_column_letter}"
@@ -1178,7 +1057,6 @@ def save_progress(
                 [new_row],
                 value_input_option="USER_ENTERED"
             )
-
 
         # ====================================================
         # ADD NEW RESPONSE
@@ -1190,7 +1068,6 @@ def save_progress(
                 new_row,
                 value_input_option="USER_ENTERED"
             )
-
 
     except Exception as e:
 
@@ -1212,26 +1089,19 @@ def save_remarks():
         .lower()
     )
 
-
     remarks = (
         st.session_state.remarks
     )
 
-
     try:
 
-        all_values = (
-            worksheet.get_all_values()
-        )
-
+        all_values = worksheet.get_all_values()
 
         if not all_values:
 
-            return
-
+            return False
 
         headers = all_values[0]
-
 
         # ----------------------------------------------------
         # Make sure remarks column exists
@@ -1249,50 +1119,37 @@ def save_remarks():
                 "remarks"
             )
 
-
-        remarks_index = (
-            headers.index(
-                "remarks"
-            )
+        remarks_index = headers.index(
+            "remarks"
         )
 
-
-        participant_index = (
-            headers.index(
-                "participant_name"
-            )
+        participant_index = headers.index(
+            "participant_name"
         )
-
 
         last_updated_index = None
 
-
         if "last_updated" in headers:
 
-            last_updated_index = (
-                headers.index(
-                    "last_updated"
-                )
+            last_updated_index = headers.index(
+                "last_updated"
             )
 
 
-        # ====================================================
-        # UPDATE ALL ROWS FOR THIS PARTICIPANT
-        # ====================================================
+        # ----------------------------------------------------
+        # UPDATE ALL ROWS FOR PARTICIPANT
+        # ----------------------------------------------------
 
         for row_number, existing_row in enumerate(
             all_values[1:],
             start=2
         ):
 
-            if (
-                participant_index
-                >=
-                len(existing_row)
+            if participant_index >= len(
+                existing_row
             ):
 
                 continue
-
 
             existing_participant = (
                 str(
@@ -1303,7 +1160,6 @@ def save_remarks():
                 .strip()
                 .lower()
             )
-
 
             if (
                 existing_participant
@@ -1317,11 +1173,7 @@ def save_remarks():
                     remarks
                 )
 
-
-                if (
-                    last_updated_index
-                    is not None
-                ):
+                if last_updated_index is not None:
 
                     worksheet.update_cell(
                         row_number,
@@ -1331,6 +1183,7 @@ def save_remarks():
                         )
                     )
 
+        return True
 
     except Exception as e:
 
@@ -1342,41 +1195,27 @@ def save_remarks():
         return False
 
 
-    return True
-
-
 # ============================================================
 # HIGHLIGHT EMPHASIZED WORDS
 # ============================================================
 
-def highlight_emphasis(
-    sentence,
-    emphasized
-):
+def highlight_emphasis(sentence, emphasized):
 
-    sentence = str(
-        sentence
-    )
-
+    sentence = str(sentence)
 
     emphasized = str(
         emphasized
     ).strip()
 
-
     if not emphasized:
 
-        return sentence
-
+        return html.escape(sentence)
 
     words = [
         emphasized
     ]
 
-
-    # --------------------------------------------------------
     # Support comma-separated and slash-separated entries
-    # --------------------------------------------------------
 
     for separator in [
         ",",
@@ -1384,7 +1223,6 @@ def highlight_emphasis(
     ]:
 
         new_words = []
-
 
         for word in words:
 
@@ -1394,9 +1232,7 @@ def highlight_emphasis(
                 )
             )
 
-
         words = new_words
-
 
     words = [
 
@@ -1407,10 +1243,7 @@ def highlight_emphasis(
         if word.strip()
     ]
 
-
-    # --------------------------------------------------------
     # Longest phrases first
-    # --------------------------------------------------------
 
     words = sorted(
         words,
@@ -1418,27 +1251,28 @@ def highlight_emphasis(
         reverse=True
     )
 
-
-    highlighted_sentence = (
+    highlighted_sentence = html.escape(
         sentence
     )
 
-
     for word in words:
+
+        escaped_word = html.escape(
+            word
+        )
 
         highlighted_sentence = (
             highlighted_sentence.replace(
-                word,
+                escaped_word,
                 (
                     "<span class='emphasis-word'>"
                     +
-                    word
+                    escaped_word
                     +
                     "</span>"
                 )
             )
         )
-
 
     return highlighted_sentence
 
@@ -1463,7 +1297,6 @@ def get_randomized_options(
         str(sample_id)
     )
 
-
     seed = int(
         hashlib.sha256(
             seed_string.encode(
@@ -1473,21 +1306,15 @@ def get_randomized_options(
         16
     )
 
-
     rng = random.Random(
         seed
     )
 
-
-    shuffled = (
-        options.copy()
-    )
-
+    shuffled = options.copy()
 
     rng.shuffle(
         shuffled
     )
-
 
     return shuffled
 
@@ -1517,6 +1344,9 @@ defaults = {
         {},
 
     "translation_selections":
+        {},
+
+    "rating_selections":
         {},
 
     "question_start_times":
@@ -1574,35 +1404,48 @@ if st.session_state.page == "welcome":
         unsafe_allow_html=True
     )
 
-
     st.markdown(
         '<div class="subtitle">'
-        'A study on the transfer of prosodic emphasis '
+        'A study on the transfer of prosodic features '
         'from English speech into Hindi translation'
         '</div>',
         unsafe_allow_html=True
     )
 
 
+    # ========================================================
+    # ABOUT THE STUDY
+    # ========================================================
+
     st.markdown(
         """
         ### About the Study
 
-        This study is designed to examine the transfer of
-        prosodic emphasis from English speech into
+        This study is designed to examine how prosodic
+        features in English speech are reflected in
         English-to-Hindi translation.
+
+        In particular, the study focuses on two aspects of
+        prosody: **emphasis** and **rising contour**. These
+        features can contribute to how a speaker's intended
+        meaning is perceived and interpreted.
 
         In each trial, you will listen to an English sentence
-        containing one or more indicated emphasized words.
-        You will first rate how strongly you perceive the
-        indicated word or words to be emphasized in the audio.
-        You will then choose the Hindi translation that you
-        think best matches the intended meaning, taking the
-        emphasis into account.
+        in an audio recording. Certain words or parts of the
+        sentence may carry prosodic prominence or a rising
+        intonation pattern.
+
+        After listening to the audio, you will first rate
+        how strongly you perceive the relevant prosodic
+        feature in the speech. You will then choose the
+        Hindi translation that you think best matches the
+        intended meaning of the English sentence, taking
+        the prosodic information into account.
 
         Your responses will help us understand how prosodic
-        emphasis in English speech is reflected in
-        English-to-Hindi translation.
+        information in English speech, including emphasis
+        and rising contour, is reflected in English-to-Hindi
+        translation.
         """
     )
 
@@ -1610,17 +1453,19 @@ if st.session_state.page == "welcome":
     st.markdown("---")
 
 
+    # ========================================================
+    # NAME
+    # ========================================================
+
     st.markdown(
         "### Enter Your Name"
     )
-
 
     name_input = st.text_input(
         "Your name",
         placeholder="Enter your name",
         key="name_input"
     )
-
 
     st.info(
         "Please use the same name if you return later "
@@ -1633,10 +1478,7 @@ if st.session_state.page == "welcome":
         use_container_width=True
     ):
 
-        name = (
-            name_input.strip()
-        )
-
+        name = name_input.strip()
 
         if not name:
 
@@ -1644,26 +1486,19 @@ if st.session_state.page == "welcome":
                 "Please enter your name before continuing."
             )
 
-
         else:
 
-            st.session_state.participant_name = (
-                name
-            )
-
+            st.session_state.participant_name = name
 
             # =================================================
             # EXISTING PARTICIPANT
             # =================================================
 
-            if participant_exists(
-                name
-            ):
+            if participant_exists(name):
 
                 load_participant_progress(
                     name
                 )
-
 
                 if (
                     st.session_state.current_question
@@ -1675,18 +1510,15 @@ if st.session_state.page == "welcome":
                         "completed"
                     )
 
-
                 else:
 
                     st.session_state.page = (
                         "experiment"
                     )
 
-
                     st.session_state.question_start_times[
                         st.session_state.current_question
                     ] = datetime.now()
-
 
             # =================================================
             # NEW PARTICIPANT
@@ -1702,17 +1534,17 @@ if st.session_state.page == "welcome":
 
                 st.session_state.translation_selections = {}
 
+                st.session_state.rating_selections = {}
+
                 st.session_state.remarks = ""
 
                 st.session_state.page = (
                     "participant_info"
                 )
 
-
             st.session_state.participant_start_time = (
                 datetime.now()
             )
-
 
             st.rerun()
 
@@ -1729,7 +1561,6 @@ elif st.session_state.page == "participant_info":
         '</div>',
         unsafe_allow_html=True
     )
-
 
     st.write(
         "Please provide the following information before "
@@ -1751,7 +1582,6 @@ elif st.session_state.page == "participant_info":
         "51+"
     ]
 
-
     current_age = (
 
         st.session_state.age_range
@@ -1762,14 +1592,11 @@ elif st.session_state.page == "participant_info":
         else age_options[0]
     )
 
-
-    st.session_state.age_range = (
-        st.selectbox(
-            "Age range",
-            age_options,
-            index=age_options.index(
-                current_age
-            )
+    st.session_state.age_range = st.selectbox(
+        "Age range",
+        age_options,
+        index=age_options.index(
+            current_age
         )
     )
 
@@ -1778,13 +1605,9 @@ elif st.session_state.page == "participant_info":
     # NATIVE LANGUAGE
     # ========================================================
 
-    st.session_state.native_language = (
-        st.text_input(
-            "Native language(s)",
-            value=(
-                st.session_state.native_language
-            )
-        )
+    st.session_state.native_language = st.text_input(
+        "Native language(s)",
+        value=st.session_state.native_language
     )
 
 
@@ -1800,7 +1623,6 @@ elif st.session_state.page == "participant_info":
         "Native / Near-native"
     ]
 
-
     current_english = (
 
         st.session_state.english_proficiency
@@ -1811,14 +1633,11 @@ elif st.session_state.page == "participant_info":
         else english_options[0]
     )
 
-
-    st.session_state.english_proficiency = (
-        st.selectbox(
-            "English proficiency",
-            english_options,
-            index=english_options.index(
-                current_english
-            )
+    st.session_state.english_proficiency = st.selectbox(
+        "English proficiency",
+        english_options,
+        index=english_options.index(
+            current_english
         )
     )
 
@@ -1835,7 +1654,6 @@ elif st.session_state.page == "participant_info":
         "Native / Near-native"
     ]
 
-
     current_hindi = (
 
         st.session_state.hindi_proficiency
@@ -1846,14 +1664,11 @@ elif st.session_state.page == "participant_info":
         else hindi_options[0]
     )
 
-
-    st.session_state.hindi_proficiency = (
-        st.selectbox(
-            "Hindi proficiency",
-            hindi_options,
-            index=hindi_options.index(
-                current_hindi
-            )
+    st.session_state.hindi_proficiency = st.selectbox(
+        "Hindi proficiency",
+        hindi_options,
+        index=hindi_options.index(
+            current_hindi
         )
     )
 
@@ -1867,7 +1682,6 @@ elif st.session_state.page == "participant_info":
         "No"
     ]
 
-
     current_headphones = (
 
         st.session_state.headphones
@@ -1878,14 +1692,11 @@ elif st.session_state.page == "participant_info":
         else headphones_options[0]
     )
 
-
-    st.session_state.headphones = (
-        st.radio(
-            "Are you using headphones or earphones?",
-            headphones_options,
-            index=headphones_options.index(
-                current_headphones
-            )
+    st.session_state.headphones = st.radio(
+        "Are you using headphones or earphones?",
+        headphones_options,
+        index=headphones_options.index(
+            current_headphones
         )
     )
 
@@ -1899,7 +1710,6 @@ elif st.session_state.page == "participant_info":
         "Yes"
     ]
 
-
     current_hearing = (
 
         st.session_state.hearing_difficulties
@@ -1910,14 +1720,11 @@ elif st.session_state.page == "participant_info":
         else hearing_options[0]
     )
 
-
-    st.session_state.hearing_difficulties = (
-        st.radio(
-            "Do you have any difficulty hearing speech?",
-            hearing_options,
-            index=hearing_options.index(
-                current_hearing
-            )
+    st.session_state.hearing_difficulties = st.radio(
+        "Do you have any difficulty hearing speech?",
+        hearing_options,
+        index=hearing_options.index(
+            current_hearing
         )
     )
 
@@ -1931,7 +1738,6 @@ elif st.session_state.page == "participant_info":
         "Yes"
     ]
 
-
     current_experience = (
 
         st.session_state.speech_experience
@@ -1942,15 +1748,12 @@ elif st.session_state.page == "participant_info":
         else experience_options[0]
     )
 
-
-    st.session_state.speech_experience = (
-        st.radio(
-            "Do you have experience in speech, "
-            "linguistics, audio, or related research?",
-            experience_options,
-            index=experience_options.index(
-                current_experience
-            )
+    st.session_state.speech_experience = st.radio(
+        "Do you have experience in speech, "
+        "linguistics, audio, or related research?",
+        experience_options,
+        index=experience_options.index(
+            current_experience
         )
     )
 
@@ -1967,7 +1770,6 @@ elif st.session_state.page == "participant_info":
         "Very familiar"
     ]
 
-
     current_prosody = (
 
         st.session_state.prosody_understanding
@@ -1978,15 +1780,11 @@ elif st.session_state.page == "participant_info":
         else prosody_options[0]
     )
 
-
-    st.session_state.prosody_understanding = (
-        st.radio(
-            "How familiar are you with the concept of "
-            "prosody in speech?",
-            prosody_options,
-            index=prosody_options.index(
-                current_prosody
-            )
+    st.session_state.prosody_understanding = st.radio(
+        "How familiar are you with the concept of prosody in speech?",
+        prosody_options,
+        index=prosody_options.index(
+            current_prosody
         )
     )
 
@@ -2000,7 +1798,6 @@ elif st.session_state.page == "participant_info":
         "Yes"
     ]
 
-
     current_listening = (
 
         st.session_state.listening_test_experience
@@ -2011,15 +1808,12 @@ elif st.session_state.page == "participant_info":
         else listening_options[0]
     )
 
-
-    st.session_state.listening_test_experience = (
-        st.radio(
-            "Have you participated in a listening or "
-            "speech perception experiment before?",
-            listening_options,
-            index=listening_options.index(
-                current_listening
-            )
+    st.session_state.listening_test_experience = st.radio(
+        "Have you participated in a listening or "
+        "speech perception experiment before?",
+        listening_options,
+        index=listening_options.index(
+            current_listening
         )
     )
 
@@ -2055,36 +1849,57 @@ elif st.session_state.page == "instructions":
 
     st.markdown(
         """
-        Please follow the instructions carefully before
-        starting the experiment.
+        Please read the following instructions carefully
+        before starting the experiment.
 
-        **For each question:**
+        ### For each question
 
-        1. Listen carefully to the English sentence in the
-           audio recording.
+        **1. Listen carefully to the English audio.**
 
-        2. The emphasized English word or words will be
-           indicated in the sentence.
+        Listen to the complete sentence before making your
+        judgment. You may replay the audio if necessary.
 
-        3. Pay attention to how the indicated word or words
-           are emphasized in the audio.
+        **2. Pay attention to the speaker's prosody.**
 
-        4. First, rate how strongly you perceive the indicated
-           English word or words to be emphasized in the audio.
+        The study focuses on two types of prosodic information:
 
-        5. Then choose the Hindi translation that you think
-           best matches the intended meaning of the English
-           sentence, while taking the emphasis into account.
+        - **Emphasis:** a word or phrase may sound more
+          prominent than the surrounding words.
 
-        **Please keep the following in mind:**
+        - **Rising contour:** the pitch may rise toward the
+          end of a word, phrase, or sentence.
 
-        - Focus on the meaning and emphasis of the sentence.
+        **3. Pay attention to the indicated part of the sentence.**
+
+        Where applicable, the relevant word or words will be
+        indicated in the English sentence.
+
+        **4. Rate the prosodic feature you perceive.**
+
+        Based on what you hear in the audio, rate how strongly
+        you perceive the relevant prosodic feature.
+
+        **5. Choose the Hindi translation.**
+
+        After giving your rating, select the Hindi translation
+        that you think best matches the intended meaning of
+        the English sentence, taking the prosodic information
+        into account.
+
+        ### Important points
+
+        - Listen carefully before answering.
+        - You may replay the audio if needed.
+        - Focus on what you hear in the English speech.
+        - Consider both the meaning of the sentence and its
+          prosodic characteristics.
         - Do not judge the speaker based on their voice,
           gender, accent, or loudness.
-        - Select the Hindi translation based on how well it
-          represents the intended meaning and emphasis.
+        - Choose the translation based on its intended meaning
+          and how well it reflects the prosodic information.
         - There are no right or wrong answers from the
-          participant's perspective.
+          participant's perspective. We are interested in
+          your perception and interpretation.
         """
     )
 
@@ -2094,17 +1909,17 @@ elif st.session_state.page == "instructions":
 
     st.markdown(
         """
-        ### Emphasis Rating Scale
+        ### Prosodic Feature Rating Scale
 
-        **1 — Not emphasized at all**
+        **1 — Not perceived at all**
 
-        **2 — Slightly emphasized**
+        **2 — Slightly perceived**
 
-        **3 — Moderately emphasized**
+        **3 — Moderately perceived**
 
-        **4 — Strongly emphasized**
+        **4 — Strongly perceived**
 
-        **5 — Very strongly emphasized**
+        **5 — Very strongly perceived**
         """
     )
 
@@ -2121,11 +1936,9 @@ elif st.session_state.page == "instructions":
             "experiment"
         )
 
-
         st.session_state.question_start_times[
             st.session_state.current_question
         ] = datetime.now()
-
 
         st.rerun()
 
@@ -2139,7 +1952,6 @@ elif st.session_state.page == "experiment":
     question_index = (
         st.session_state.current_question
     )
-
 
     total_questions = len(
         questions
@@ -2163,11 +1975,9 @@ elif st.session_state.page == "experiment":
         question_index
     ]
 
-
     sample_id = str(
         row["sample id"]
     ).strip()
-
 
     question_number = (
         question_index + 1
@@ -2183,7 +1993,6 @@ elif st.session_state.page == "experiment":
         /
         total_questions
     )
-
 
     st.markdown(
         f'<div class="progress-text">'
@@ -2205,16 +2014,13 @@ elif st.session_state.page == "experiment":
         unsafe_allow_html=True
     )
 
-
     english_sentence = (
         row["english sentence"]
     )
 
-
     emphasized_word = (
         row["emphasized word"]
     )
-
 
     highlighted_sentence = (
         highlight_emphasis(
@@ -2223,13 +2029,31 @@ elif st.session_state.page == "experiment":
         )
     )
 
-
     st.markdown(
         f'<div class="sentence-box">'
         f'{highlighted_sentence}'
         f'</div>',
         unsafe_allow_html=True
     )
+
+
+    # ========================================================
+    # FEATURE INFORMATION
+    # ========================================================
+
+    prosodic_feature = get_prosodic_feature(
+        row
+    )
+
+    if prosodic_feature:
+
+        st.markdown(
+            f"**Prosodic feature:** "
+            f"<span class='emphasis-word'>"
+            f"{html.escape(prosodic_feature)}"
+            f"</span>",
+            unsafe_allow_html=True
+        )
 
 
     # ========================================================
@@ -2241,9 +2065,9 @@ elif st.session_state.page == "experiment":
     ).strip():
 
         st.markdown(
-            f"**Emphasized word(s):** "
+            f"**Indicated word(s):** "
             f"<span class='emphasis-word'>"
-            f"{emphasized_word}"
+            f"{html.escape(str(emphasized_word))}"
             f"</span>",
             unsafe_allow_html=True
         )
@@ -2257,12 +2081,10 @@ elif st.session_state.page == "experiment":
         row["audiofile"]
     ).strip()
 
-
     audio_path = os.path.join(
         AUDIO_FOLDER,
         audio_filename
     )
-
 
     if os.path.exists(
         audio_path
@@ -2292,7 +2114,6 @@ elif st.session_state.page == "experiment":
         )
     )
 
-
     previous_selection = (
         existing_answer.get(
             "selected_translation",
@@ -2300,32 +2121,12 @@ elif st.session_state.page == "experiment":
         )
     )
 
-
     previous_rating = (
         existing_answer.get(
-            "emphasis_rating",
+            "prosodic_rating",
             None
         )
     )
-
-
-    try:
-
-        if previous_rating != "":
-
-            previous_rating = int(
-                float(
-                    previous_rating
-                )
-            )
-
-        else:
-
-            previous_rating = None
-
-    except Exception:
-
-        previous_rating = None
 
 
     # ========================================================
@@ -2342,32 +2143,34 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # EMPHASIS RATING
-    # FIRST
+    # PROSODIC RATING — FIRST
     # ========================================================
 
     st.markdown("---")
 
-
     st.markdown(
-        "### How strongly did you perceive the "
-        "emphasized word(s) in the audio?"
+        "### How strongly did you perceive the relevant "
+        "prosodic feature in the audio?"
+    )
+
+    st.write(
+        "Please base your rating on what you hear in the "
+        "audio recording."
     )
 
 
     rating_labels = {
 
-        1: "Not emphasized at all",
+        1: "Not perceived at all",
 
-        2: "Slightly emphasized",
+        2: "Slightly perceived",
 
-        3: "Moderately emphasized",
+        3: "Moderately perceived",
 
-        4: "Strongly emphasized",
+        4: "Strongly perceived",
 
-        5: "Very strongly emphasized"
+        5: "Very strongly perceived"
     }
-
 
     rating_options = [
         1,
@@ -2378,8 +2181,27 @@ elif st.session_state.page == "experiment":
     ]
 
 
+    # Convert saved value safely
+
+    try:
+
+        if previous_rating != "":
+
+            previous_rating = int(
+                float(previous_rating)
+            )
+
+        else:
+
+            previous_rating = None
+
+    except Exception:
+
+        previous_rating = None
+
+
     emphasis_rating = st.radio(
-        "Emphasis rating",
+        "Prosodic feature rating",
         rating_options,
         index=(
             rating_options.index(
@@ -2396,29 +2218,26 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # TRANSLATION CHOICE
-    # SECOND
+    # TRANSLATION CHOICE — SECOND
     # ========================================================
 
     st.markdown("---")
-
 
     st.markdown(
         "### Choose the Hindi translation"
     )
 
-
     st.markdown(
         '<div class="translation-note">'
         'Select the translation that best matches the '
-        'intended meaning and emphasis.'
+        'intended meaning and prosodic interpretation.'
         '</div>',
         unsafe_allow_html=True
     )
 
 
     # ========================================================
-    # TWO TRANSLATION OPTIONS
+    # EXACTLY TWO TRANSLATION OPTIONS
     # ========================================================
 
     options = [
@@ -2449,10 +2268,6 @@ elif st.session_state.page == "experiment":
     ]
 
 
-    # ========================================================
-    # EXACTLY TWO OPTIONS
-    # ========================================================
-
     if len(valid_options) != 2:
 
         st.error(
@@ -2479,7 +2294,6 @@ elif st.session_state.page == "experiment":
             )
         )
 
-
         st.session_state.randomized_options[
             sample_id
         ] = shuffled_options
@@ -2502,7 +2316,7 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # INITIALIZE TRANSLATION SELECTION
+    # FIND PREVIOUS TRANSLATION SELECTION
     # ========================================================
 
     if sample_id not in (
@@ -2514,7 +2328,7 @@ elif st.session_state.page == "experiment":
         ] = previous_selection
 
 
-    selected_translation = (
+    previous_translation = (
         st.session_state.translation_selections[
             sample_id
         ]
@@ -2525,110 +2339,31 @@ elif st.session_state.page == "experiment":
     # TRANSLATION CARDS
     # ========================================================
 
-    with st.container(
-        key="translation_cards"
-    ):
-
-        col1, col2 = st.columns(
-            2,
-            gap="medium"
-        )
-
-
-        # ====================================================
-        # OPTION 1
-        # ====================================================
-
-        with col1:
-
-            option_text = (
-                display_texts[0]
+    selected_translation = st.radio(
+        "Translation options",
+        display_texts,
+        index=(
+            display_texts.index(
+                previous_translation
             )
-
-
-            is_selected = (
-                selected_translation
-                ==
-                option_text
-            )
-
-
-            if st.button(
-                option_text,
-                key=(
-                    f"translation_option_"
-                    f"{sample_id}_0"
-                ),
-                use_container_width=True,
-                type=(
-                    "primary"
-                    if is_selected
-                    else "secondary"
-                )
-            ):
-
-                st.session_state.translation_selections[
-                    sample_id
-                ] = option_text
-
-                st.rerun()
-
-
-        # ====================================================
-        # OPTION 2
-        # ====================================================
-
-        with col2:
-
-            option_text = (
-                display_texts[1]
-            )
-
-
-            is_selected = (
-                selected_translation
-                ==
-                option_text
-            )
-
-
-            if st.button(
-                option_text,
-                key=(
-                    f"translation_option_"
-                    f"{sample_id}_1"
-                ),
-                use_container_width=True,
-                type=(
-                    "primary"
-                    if is_selected
-                    else "secondary"
-                )
-            ):
-
-                st.session_state.translation_selections[
-                    sample_id
-                ] = option_text
-
-                st.rerun()
-
-
-    # ========================================================
-    # CURRENT SELECTION
-    # ========================================================
-
-    selected_translation = (
-        st.session_state.translation_selections[
-            sample_id
-        ]
+            if previous_translation
+            in display_texts
+            else None
+        ),
+        key=f"translation_choice_{sample_id}",
+        label_visibility="collapsed"
     )
 
 
-    if selected_translation is None:
+    # ========================================================
+    # STORE CURRENT TRANSLATION SELECTION
+    # ========================================================
 
-        st.info(
-            "Please select one of the two translations."
-        )
+    if selected_translation is not None:
+
+        st.session_state.translation_selections[
+            sample_id
+        ] = selected_translation
 
 
     # ========================================================
@@ -2636,7 +2371,6 @@ elif st.session_state.page == "experiment":
     # ========================================================
 
     st.markdown("---")
-
 
     col1, col2 = st.columns(2)
 
@@ -2656,11 +2390,9 @@ elif st.session_state.page == "experiment":
 
                 st.session_state.current_question -= 1
 
-
                 st.session_state.question_start_times[
                     st.session_state.current_question
                 ] = datetime.now()
-
 
                 st.rerun()
 
@@ -2693,6 +2425,7 @@ elif st.session_state.page == "experiment":
             use_container_width=True
         ):
 
+
             # =================================================
             # VALIDATION
             # =================================================
@@ -2700,7 +2433,7 @@ elif st.session_state.page == "experiment":
             if emphasis_rating is None:
 
                 st.warning(
-                    "Please provide an emphasis rating."
+                    "Please provide a prosodic feature rating."
                 )
 
                 st.stop()
@@ -2709,7 +2442,7 @@ elif st.session_state.page == "experiment":
             if selected_translation is None:
 
                 st.warning(
-                    "Please select a Hindi translation."
+                    "Please select one of the two Hindi translations."
                 )
 
                 st.stop()
@@ -2726,7 +2459,6 @@ elif st.session_state.page == "experiment":
                 )
             )
 
-
             response_time = (
                 datetime.now()
                 -
@@ -2740,7 +2472,6 @@ elif st.session_state.page == "experiment":
 
             selected_source = ""
 
-
             for source, text in shuffled_options:
 
                 if (
@@ -2749,9 +2480,7 @@ elif st.session_state.page == "experiment":
                     selected_translation
                 ):
 
-                    selected_source = (
-                        source
-                    )
+                    selected_source = source
 
                     break
 
@@ -2770,7 +2499,7 @@ elif st.session_state.page == "experiment":
                 "selected_translation_type":
                     selected_source,
 
-                "emphasis_rating":
+                "prosodic_rating":
                     emphasis_rating,
 
                 "response_time_seconds":
@@ -2812,7 +2541,6 @@ elif st.session_state.page == "experiment":
 
                 st.session_state.current_question += 1
 
-
                 st.session_state.question_start_times[
                     st.session_state.current_question
                 ] = datetime.now()
@@ -2840,9 +2568,11 @@ elif st.session_state.page == "remarks":
         We would appreciate any comments or remarks you
         may have about your experience with the study.
 
-        You may comment on the understanding of the question, understanding of the translations,
-        emphasis understanding, difficulty of the task, or anything else
-        you noticed during the experiment.
+        You may comment on the clarity of the questions,
+        the audio, the translations, the perception of
+        emphasis or rising contour, the difficulty of the
+        task, or anything else you noticed during the
+        experiment.
         """
     )
 
@@ -2858,9 +2588,7 @@ elif st.session_state.page == "remarks":
     remarks = st.text_area(
         "Please enter your comments or remarks",
         value=st.session_state.remarks,
-        placeholder=(
-            "Enter your remarks here..."
-        ),
+        placeholder="Enter your remarks here...",
         height=180
     )
 
@@ -2879,7 +2607,6 @@ elif st.session_state.page == "remarks":
     ):
 
         success = save_remarks()
-
 
         if success:
 
