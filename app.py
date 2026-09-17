@@ -1212,21 +1212,6 @@ if st.session_state.page == "welcome":
         """
     )
 
-    st.markdown(
-        """
-        ### Important points
-
-        - Listen carefully before answering.
-        - You may replay the audio.
-        - Base your rating on what you actually hear.
-        - Consider both the meaning and prosodic characteristics.
-        - Do not judge the speaker based on voice, gender,
-          accent, or loudness.
-        - There are no right or wrong answers from your
-          perspective as a participant.
-        
-        """
-    )
 
     st.markdown(
         """
@@ -1516,59 +1501,6 @@ elif st.session_state.page == "participant_info":
 # ============================================================
 
 elif st.session_state.page == "instructions":
-
-    st.markdown(
-        '<div class="section-title">'
-        'Instructions'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-    st.write(
-        "Please read the instructions carefully before starting."
-    )
-
-    st.markdown(
-        """
-        ### What you need to do
-
-        **1. Listen carefully to the English audio.**
-
-        You may replay the recording as many times as necessary.
-
-        **2. Pay attention to the speaker's prosody**, especially:
-
-        - **Emphasis:** a word or phrase may sound more prominent
-          than the surrounding words.
-        - **Rising contour:** the pitch may rise toward the end
-          of a word, phrase, or sentence.
-
-        **3. Pay attention to the indicated word or phrase**
-        where applicable.
-
-        **4. Rate how strongly you perceive the relevant
-        prosodic feature in the audio.**
-
-        **5. Choose the Hindi translation** that best matches
-        the intended meaning and the prosodic interpretation
-        you perceived.
-        """
-    )
-
-    st.markdown(
-        """
-        ### Important points
-
-        - Listen carefully before answering.
-        - You may replay the audio.
-        - Base your rating on what you actually hear.
-        - Consider both the meaning and prosodic characteristics.
-        - Do not judge the speaker based on voice, gender,
-          accent, or loudness.
-        - There are no right or wrong answers from your
-          perspective as a participant.
-        """
-    )
 
     st.markdown(
         """
