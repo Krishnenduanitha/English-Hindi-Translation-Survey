@@ -996,19 +996,17 @@ st.markdown(
     """
 <style>
 
-/* ============================================================
-   GENERAL
-   ============================================================ */
-
 .main-title {
     font-size: 42px;
     font-weight: 700;
     margin-bottom: 5px;
+    color: var(--text-color);
 }
 
 .subtitle {
     font-size: 20px;
-    color: #aeb6c2;
+    color: var(--text-color);
+    opacity: 0.65;
     margin-bottom: 35px;
 }
 
@@ -1017,11 +1015,13 @@ st.markdown(
     font-weight: 650;
     margin-top: 25px;
     margin-bottom: 15px;
+    color: var(--text-color);
 }
 
 .sentence-box {
-    background-color: #15171c;
-    border: 1px solid #3d4148;
+    background-color: var(--secondary-background-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
     border-radius: 12px;
     padding: 22px;
     font-size: 21px;
@@ -1038,249 +1038,116 @@ st.markdown(
 }
 
 .info-box {
-    background-color: #15171c;
-    border: 1px solid #3d4148;
+    background-color: var(--secondary-background-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
     border-radius: 12px;
     padding: 20px;
     margin-top: 15px;
     margin-bottom: 20px;
 }
 
-
-/* ============================================================
-   TRANSLATION OPTIONS
-   ============================================================ */
-
-/*
-   We intentionally target the complete translation widget.
-*/
+.info-box p,
+.info-box strong,
+.info-box b {
+    color: var(--text-color) !important;
+}
 
 div[class*="st-key-translation_choice_"] {
     width: 100% !important;
 }
 
-
-/*
-   The two options must be vertically separated.
-*/
-
-div[class*="st-key-translation_choice_"]
-div[role="radiogroup"] {
-
+div[class*="st-key-translation_choice_"] div[role="radiogroup"] {
     display: flex !important;
-
     flex-direction: column !important;
-
     width: 100% !important;
-
     gap: 30px !important;
-
     margin-top: 15px !important;
-
     margin-bottom: 20px !important;
 }
 
-
-/*
-   EACH OPTION IS ITS OWN BOX.
-
-   Do NOT use > label here because Streamlit can place
-   wrappers between the radiogroup and the label.
-*/
-
-div[class*="st-key-translation_choice_"]
-div[role="radiogroup"]
-label {
-
+div[class*="st-key-translation_choice_"] div[role="radiogroup"] label {
     display: flex !important;
-
     flex-direction: row !important;
-
     align-items: flex-start !important;
-
     width: 100% !important;
-
     min-height: 115px !important;
-
     box-sizing: border-box !important;
-
     padding: 26px 30px !important;
-
     margin: 0 !important;
-
-    border: 2px solid #555b65 !important;
-
+    border: 2px solid var(--text-color) !important;
     border-radius: 15px !important;
-
-    background-color: #15171c !important;
-
+    background-color: var(--secondary-background-color) !important;
+    color: var(--text-color) !important;
     cursor: pointer !important;
-
     white-space: normal !important;
-
     overflow: visible !important;
-
-    transition:
-        background-color 0.2s ease,
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        transform 0.2s ease !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease !important;
 }
 
-
-/*
-   HOVER
-*/
-
-div[class*="st-key-translation_choice_"]
-div[role="radiogroup"]
-label:hover {
-
-    background-color: #1c2a3d !important;
-
-    border-color: #4da3ff !important;
-
-    box-shadow:
-        0 5px 18px rgba(77, 163, 255, 0.20) !important;
-
-    transform: translateY(-2px) !important;
-}
-
-
-/*
-   RADIO BUTTON
-*/
-
-div[class*="st-key-translation_choice_"]
-div[role="radiogroup"]
-label input {
-
-    flex: 0 0 auto !important;
-
-    width: 20px !important;
-
-    height: 20px !important;
-
-    margin-top: 5px !important;
-
-    margin-right: 18px !important;
-}
-
-
-/*
-   ALL TEXT INSIDE THE OPTION MUST WRAP.
-*/
-
-div[class*="st-key-translation_choice_"]
-div[role="radiogroup"]
-label p {
-
+div[class*="st-key-translation_choice_"] div[role="radiogroup"] label p {
     display: block !important;
-
     width: 100% !important;
-
     max-width: 100% !important;
-
     margin: 0 !important;
-
     padding: 0 !important;
-
     font-size: 21px !important;
-
     line-height: 1.8 !important;
-
+    color: var(--text-color) !important;
     white-space: normal !important;
-
     overflow: visible !important;
-
     text-overflow: clip !important;
-
     word-break: normal !important;
-
     overflow-wrap: anywhere !important;
 }
 
-
-/*
-   Force nested containers to allow the Hindi sentence
-   to occupy the full available width.
-*/
-
-div[class*="st-key-translation_choice_"]
-div[role="radiogroup"]
-label > div {
-
+div[class*="st-key-translation_choice_"] div[role="radiogroup"] label > div {
     width: 100% !important;
-
     max-width: 100% !important;
-
     white-space: normal !important;
-
     overflow: visible !important;
+    color: var(--text-color) !important;
 }
 
+div[class*="st-key-translation_choice_"] div[role="radiogroup"] label input {
+    flex: 0 0 auto !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin-top: 5px !important;
+    margin-right: 18px !important;
+}
 
-/*
-   SELECTED OPTION
-*/
+div[class*="st-key-translation_choice_"] div[role="radiogroup"] label:hover {
+    background-color: var(--secondary-background-color) !important;
+    border-color: #4da3ff !important;
+    box-shadow: 0 5px 18px rgba(77, 163, 255, 0.20) !important;
+    transform: translateY(-2px) !important;
+}
 
-div[class*="st-key-translation_choice_"]
-div[role="radiogroup"]
-label:has(input:checked) {
-
-    background-color: #18243a !important;
-
+div[class*="st-key-translation_choice_"] div[role="radiogroup"] label:has(input:checked) {
+    background-color: var(--secondary-background-color) !important;
     border: 2px solid #4da3ff !important;
-
-    box-shadow:
-        0 0 0 1px #4da3ff,
-        0 6px 20px rgba(77, 163, 255, 0.20) !important;
+    box-shadow: 0 0 0 1px #4da3ff, 0 6px 20px rgba(77, 163, 255, 0.20) !important;
 }
-
-
-/*
-   MOBILE
-*/
-
-@media (max-width: 768px) {
-
-    div[class*="st-key-translation_choice_"]
-    div[role="radiogroup"] {
-
-        gap: 20px !important;
-    }
-
-    div[class*="st-key-translation_choice_"]
-    div[role="radiogroup"]
-    label {
-
-        min-height: 100px !important;
-
-        padding: 20px 22px !important;
-    }
-
-    div[class*="st-key-translation_choice_"]
-    div[role="radiogroup"]
-    label p {
-
-        font-size: 18px !important;
-
-        line-height: 1.7 !important;
-    }
-}
-
-
-/* ============================================================
-   AUDIO
-   ============================================================ */
 
 audio {
-
     width: 100% !important;
-
     margin-top: 10px;
-
     margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    div[class*="st-key-translation_choice_"] div[role="radiogroup"] {
+        gap: 20px !important;
+    }
+    div[class*="st-key-translation_choice_"] div[role="radiogroup"] label {
+        min-height: 100px !important;
+        padding: 20px 22px !important;
+    }
+    div[class*="st-key-translation_choice_"] div[role="radiogroup"] label p {
+        font-size: 18px !important;
+        line-height: 1.7 !important;
+    }
 }
 
 </style>
@@ -1302,13 +1169,6 @@ if st.session_state.page == "welcome":
         unsafe_allow_html=True
     )
 
-    st.markdown(
-        '<div class="subtitle">'
-        'A study on the transfer of prosodic features '
-        'from English speech into Hindi translation'
-        '</div>',
-        unsafe_allow_html=True
-    )
 
     st.markdown(
         "## About the Study"
@@ -1328,6 +1188,43 @@ if st.session_state.page == "welcome":
         feature, and then choose the Hindi translation that
         best matches the intended meaning and prosodic
         interpretation.
+        
+        **1. Listen carefully to the English audio.**
+
+        You may replay the recording as many times as necessary.
+
+        **2. Pay attention to the speaker's prosody**, especially:
+
+        - **Emphasis:** a word or phrase may sound more prominent
+          than the surrounding words.
+        - **Rising contour:** the pitch may rise toward the end
+          of a word, phrase, or sentence.
+
+        **3. Pay attention to the indicated word or phrase**
+        where applicable.
+
+        **4. Rate how strongly you perceive the relevant
+        prosodic feature in the audio.**
+
+        **5. Choose the Hindi translation** that best matches
+        the intended meaning and the prosodic interpretation
+        you perceived.
+        """
+    )
+
+    st.markdown(
+        """
+        ### Important points
+
+        - Listen carefully before answering.
+        - You may replay the audio.
+        - Base your rating on what you actually hear.
+        - Consider both the meaning and prosodic characteristics.
+        - Do not judge the speaker based on voice, gender,
+          accent, or loudness.
+        - There are no right or wrong answers from your
+          perspective as a participant.
+        
         """
     )
 
@@ -1341,8 +1238,8 @@ if st.session_state.page == "welcome":
         audio. There are no right or wrong answers from the
         participant's perspective.
 
-        Note: Only focus on the given emphasized word there might be 
-        other emphasized words in the audio , just ignore those.
+        Note: Only focus on the given emphasized word.
+        There might be other emphasized words in the audio , just ignore those.
 
         </div>
         """,
@@ -2237,7 +2134,7 @@ elif st.session_state.page == "remarks":
         You may comment on:
 
         - Clarity of the instructions
-        - Understanding the questions
+        - Understanding the question
         - Understanding translations
         - Emphasis understanding
         - Rising contour understanding
