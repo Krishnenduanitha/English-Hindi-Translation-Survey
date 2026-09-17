@@ -2237,10 +2237,10 @@ elif st.session_state.page == "remarks":
         You may comment on:
 
         - Clarity of the instructions
-        - Audio quality
-        - Translation options
-        - Your perception of emphasis
-        - Your perception of rising contour
+        - Understanding the questions
+        - Understanding translations
+        - Emphasis understanding
+        - Rising contour understanding
         - Difficulty of the task
         - Anything else you would like to mention
         """
