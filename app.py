@@ -175,6 +175,44 @@ def initialize_sheet():
         return worksheet
 
 
+def worksheet_to_dataframe(worksheet):
+    """
+    Read Google Sheets using raw values instead of get_all_records().
+    This avoids failures when a worksheet has duplicate/blank headers.
+    """
+    values = worksheet.get_all_values()
+
+    if not values:
+        return pd.DataFrame(columns=HEADERS)
+
+    header_row = list(values[0])
+
+    # Normalize the header row to the expected headers.
+    if len(header_row) < len(HEADERS):
+        header_row += [""] * (len(HEADERS) - len(header_row))
+    header_row = header_row[:len(HEADERS)]
+
+    # Use the expected headers as the dataframe schema.
+    data_rows = []
+    for row_values in values[1:]:
+        row_values = list(row_values)
+        if len(row_values) < len(HEADERS):
+            row_values += [""] * (len(HEADERS) - len(row_values))
+        data_rows.append(row_values[:len(HEADERS)])
+
+    return pd.DataFrame(data_rows, columns=HEADERS)
+
+
+def get_sheet_records(worksheet):
+    """Return sheet rows as dictionaries without get_all_records()."""
+    df = worksheet_to_dataframe(worksheet)
+
+    if df.empty:
+        return []
+
+    return df.to_dict("records")
+
+
 # ============================================================
 # READ RESPONSES
 # ============================================================
@@ -184,30 +222,10 @@ def read_responses():
     worksheet = initialize_sheet()
 
     if worksheet is None:
-
-        return pd.DataFrame(
-            columns=HEADERS
-        )
+        return pd.DataFrame(columns=HEADERS)
 
     try:
-
-        records = worksheet.get_all_records()
-
-        if not records:
-
-            return pd.DataFrame(
-                columns=HEADERS
-            )
-
-        df = pd.DataFrame(records)
-
-        for col in HEADERS:
-
-            if col not in df.columns:
-
-                df[col] = ""
-
-        return df
+        return worksheet_to_dataframe(worksheet)
 
     except Exception as e:
 
@@ -217,9 +235,7 @@ def read_responses():
 
         st.exception(e)
 
-        return pd.DataFrame(
-            columns=HEADERS
-        )
+        return pd.DataFrame(columns=HEADERS)
 
 
 # ============================================================
@@ -308,6 +324,7 @@ def load_questions():
         "english sentence",
         "hindi translation",
         "machine translation",
+        "prosody translation",
         "emphasized word",
         "audiofile"
     ]
@@ -435,7 +452,8 @@ def get_randomized_options(
     participant_name,
     sample_id,
     hindi_translation,
-    machine_translation
+    machine_translation,
+    prosody_translation
 ):
 
     seed_string = (
@@ -446,37 +464,26 @@ def get_randomized_options(
         seed_string.encode("utf-8")
     ).hexdigest()
 
-    seed = int(
-        seed_hash[:16],
-        16
-    )
+    seed = int(seed_hash[:16], 16)
 
-    rng = random.Random(
-        seed
-    )
+    rng = random.Random(seed)
 
     options = [
-
         {
-            "text": str(
-                hindi_translation
-            ).strip(),
-
+            "text": str(hindi_translation).strip(),
             "type": "Hindi Translation"
         },
-
         {
-            "text": str(
-                machine_translation
-            ).strip(),
-
+            "text": str(machine_translation).strip(),
             "type": "Machine Translation"
+        },
+        {
+            "text": str(prosody_translation).strip(),
+            "type": "Prosody Translation"
         }
     ]
 
-    rng.shuffle(
-        options
-    )
+    rng.shuffle(options)
 
     return options
 
@@ -784,7 +791,7 @@ def save_progress(
 
     try:
 
-        records = worksheet.get_all_records()
+        records = get_sheet_records(worksheet)
 
         participant_name = (
             st.session_state
@@ -876,7 +883,7 @@ def save_remarks():
 
     try:
 
-        records = worksheet.get_all_records()
+        records = get_sheet_records(worksheet)
 
         participant_name = (
             st.session_state
@@ -1731,6 +1738,10 @@ elif st.session_state.page == "experiment":
         row["machine translation"]
     ).strip()
 
+    prosody_translation = str(
+        row["prosody translation"]
+    ).strip()
+
     emphasized_word = str(
         row["emphasized word"]
     ).strip()
@@ -1918,34 +1929,37 @@ elif st.session_state.page == "experiment":
     )
 
     st.write(
-        "Select the translation that best matches the "
-        "intended meaning and prosodic interpretation."
+        "Three Hindi versions are shown below. Select the "
+        "version that best matches the intended meaning and "
+        "prosodic interpretation."
     )
 
 
     # ========================================================
-    # ENSURE TWO OPTIONS
+    # ENSURE THREE OPTIONS
     # ========================================================
 
     if not hindi_translation:
-
         st.error(
             "Hindi translation is missing for this question."
         )
-
         st.stop()
 
     if not machine_translation:
-
         st.error(
             "Machine translation is missing for this question."
         )
+        st.stop()
 
+    if not prosody_translation:
+        st.error(
+            "Prosody translation is missing for this question."
+        )
         st.stop()
 
 
     # ========================================================
-    # RANDOMIZE
+    # RANDOMIZE THREE OPTIONS
     # ========================================================
 
     options = get_randomized_options(
@@ -1956,7 +1970,9 @@ elif st.session_state.page == "experiment":
 
         hindi_translation,
 
-        machine_translation
+        machine_translation,
+
+        prosody_translation
     )
 
     st.session_state.randomized_options[
@@ -1997,7 +2013,7 @@ elif st.session_state.page == "experiment":
 
 
     # ========================================================
-    # TWO TRANSLATION OPTION BOXES
+    # THREE TRANSLATION OPTION BOXES
     # ========================================================
 
     selected_translation = st.radio(
