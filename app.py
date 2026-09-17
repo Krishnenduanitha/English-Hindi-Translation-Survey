@@ -480,6 +480,10 @@ def get_randomized_options(
         {
             "text": str(prosody_translation).strip(),
             "type": "Prosody Translation"
+        },
+        {
+        "text": "None of these",
+        "type": "none"
         }
     ]
 
