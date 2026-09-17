@@ -29,7 +29,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 EXCEL_FILE = os.path.join(
     BASE_DIR,
-    "top10_gold14_nllb_FAILURES.xlsx"
+    "Hindi 24 sentences.xlsx"
 )
 
 AUDIO_DIR = os.path.join(
@@ -1333,6 +1333,9 @@ if st.session_state.page == "welcome":
         Your responses are based on your perception of the
         audio. There are no right or wrong answers from the
         participant's perspective.
+
+        Note: Only focus on the given emphasized word there might be 
+        other emphasized words in the audio , just ignore those.
 
         </div>
         """,
