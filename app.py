@@ -1254,6 +1254,89 @@ elif st.session_state.page == "participant_info":
 
     st.markdown(
         '<div class="section-title">'
+        'Participant Name'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    st.write(
+        "Please enter your name to begin or resume the study."
+    )
+
+    participant_name = st.text_input(
+        "Participant name",
+        value=st.session_state.participant_name,
+        placeholder="Enter your name"
+    )
+
+    if st.button(
+        "Continue →",
+        type="primary",
+        use_container_width=True
+    ):
+
+        if not participant_name.strip():
+
+            st.warning(
+                "Please enter your name."
+            )
+
+        else:
+
+            st.session_state.participant_name = (
+                participant_name.strip()
+            )
+
+            progress = load_participant_progress(
+                st.session_state.participant_name
+            )
+
+            if participant_exists(
+                st.session_state.participant_name
+            ):
+
+                st.session_state.demographics = (
+                    progress["demographics"]
+                )
+
+                st.session_state.answers = (
+                    progress["answers"]
+                )
+
+                st.session_state.remarks = (
+                    progress["remarks"]
+                )
+
+                st.session_state.current_question = (
+                    progress["first_unanswered"]
+                )
+
+                if (
+                    st.session_state.current_question
+                    >= len(questions_df)
+                ):
+
+                    st.session_state.page = "completed"
+
+                else:
+
+                    st.session_state.page = "instructions"
+
+            else:
+
+                st.session_state.page = "metadata"
+
+            st.rerun()
+
+
+# ============================================================
+# METADATA
+# ============================================================
+
+elif st.session_state.page == "metadata":
+
+    st.markdown(
+        '<div class="section-title">'
         'Participant Information'
         '</div>',
         unsafe_allow_html=True
@@ -1261,12 +1344,6 @@ elif st.session_state.page == "participant_info":
 
     st.write(
         "Please provide the following information before beginning the study."
-    )
-
-    participant_name = st.text_input(
-        "Participant name",
-        value=st.session_state.participant_name,
-        placeholder="Enter your name"
     )
 
     age_range = st.radio(
@@ -1364,13 +1441,7 @@ elif st.session_state.page == "participant_info":
         use_container_width=True
     ):
 
-        if not participant_name.strip():
-
-            st.warning(
-                "Please enter your name."
-            )
-
-        elif not age_range:
+        if not age_range:
 
             st.warning(
                 "Please select your age range."
@@ -1426,10 +1497,6 @@ elif st.session_state.page == "participant_info":
 
         else:
 
-            st.session_state.participant_name = (
-                participant_name.strip()
-            )
-
             st.session_state.demographics = {
 
                 "age_range":
@@ -1460,42 +1527,9 @@ elif st.session_state.page == "participant_info":
                     listening_test_experience
             }
 
-            progress = load_participant_progress(
-                st.session_state.participant_name
-            )
+            st.session_state.current_question = 0
 
-            if participant_exists(
-                st.session_state.participant_name
-            ):
-
-                st.session_state.answers = (
-                    progress["answers"]
-                )
-
-                st.session_state.remarks = (
-                    progress["remarks"]
-                )
-
-                st.session_state.current_question = (
-                    progress["first_unanswered"]
-                )
-
-                if (
-                    st.session_state.current_question
-                    >= len(questions_df)
-                ):
-
-                    st.session_state.page = "completed"
-
-                else:
-
-                    st.session_state.page = "instructions"
-
-            else:
-
-                st.session_state.current_question = 0
-
-                st.session_state.page = "instructions"
+            st.session_state.page = "instructions"
 
             st.rerun()
 
